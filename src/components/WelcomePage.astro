@@ -75,6 +75,10 @@ const blogHref = localizedPath(locale, '/blog');
           {ui.nav.friends}
           <span aria-hidden="true">↗</span>
         </a>
+        <a class="mono welcome-friends" href={localizedPath(locale, '/tools')}>
+          {ui.nav.tools}
+          <span aria-hidden="true">↗</span>
+        </a>
         <nav class="welcome-langs" aria-label={ui.language}>
           {locales.map((item) => (
             <a

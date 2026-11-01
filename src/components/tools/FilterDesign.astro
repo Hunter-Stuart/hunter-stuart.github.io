@@ -1,0 +1,505 @@
+---
+import type { Locale } from '../../i18n/config';
+import { filterCopy } from '../../i18n/tools';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const copy = filterCopy[locale];
+---
+
+<div class="filter-tool" data-filter data-unstable={copy.unstable}>
+  <div class="filter-controls">
+    <label class="pomodoro-field">
+      <span>{copy.kind}</span>
+      <select data-opt="kind">
+        <option value="lowpass">{copy.kinds.lowpass}</option>
+        <option value="highpass">{copy.kinds.highpass}</option>
+        <option value="bandpass">{copy.kinds.bandpass}</option>
+      </select>
+    </label>
+
+    <label class="pomodoro-field">
+      <span>{copy.design}</span>
+      <select data-opt="design">
+        <option value="butterworth">{copy.designs.butterworth}</option>
+        <option value="chebyshev">{copy.designs.chebyshev}</option>
+        <option value="fir">{copy.designs.fir}</option>
+      </select>
+    </label>
+
+    <label class="pomodoro-field">
+      <span>{copy.order}</span>
+      <input type="number" min="1" max="12" step="1" value="4" data-opt="order" />
+    </label>
+
+    <label class="pomodoro-field">
+      <span>{copy.cutoff} (× Nyquist)</span>
+      <input type="number" min="0.05" max="0.95" step="0.01" value="0.25" data-opt="cutoff" />
+    </label>
+
+    <label class="pomodoro-field" data-ripple-field>
+      <span>{copy.ripple} (dB)</span>
+      <input type="number" min="0.1" max="6" step="0.1" value="1" data-opt="ripple" />
+    </label>
+
+    <label class="pomodoro-field" data-window-field hidden>
+      <span>{copy.window}</span>
+      <select data-opt="window">
+        <option value="hamming">{copy.windows.hamming}</option>
+        <option value="hann">{copy.windows.hann}</option>
+        <option value="blackman">{copy.windows.blackman}</option>
+      </select>
+    </label>
+  </div>
+
+  <p class="filter-status" data-status hidden></p>
+
+  <div class="filter-plots">
+    <figure class="filter-plot">
+      <figcaption class="mono">{copy.magnitude} · dB</figcaption>
+      <div class="tool-canvas-wrap">
+        <canvas data-plot="magnitude" width="720" height="300"></canvas>
+      </div>
+    </figure>
+
+    <figure class="filter-plot">
+      <figcaption class="mono">{copy.phase} · °</figcaption>
+      <div class="tool-canvas-wrap">
+        <canvas data-plot="phase" width="720" height="240"></canvas>
+      </div>
+    </figure>
+
+    <figure class="filter-plot filter-plot--pz">
+      <figcaption class="mono">{copy.poles}</figcaption>
+      <div class="tool-canvas-wrap">
+        <canvas data-plot="pz" width="480" height="480"></canvas>
+      </div>
+    </figure>
+  </div>
+
+  <details class="filter-coeffs">
+    <summary>{copy.coeffs}</summary>
+    <pre data-coeffs class="mono"></pre>
+  </details>
+
+  <p class="tool-note">{copy.hint}</p>
+</div>
+
+<script>
+  type Kind = 'lowpass' | 'highpass' | 'bandpass';
+  type Design = 'butterworth' | 'chebyshev' | 'fir';
+  type WindowName = 'hamming' | 'hann' | 'blackman';
+
+  interface Complex {
+    re: number;
+    im: number;
+  }
+
+  interface DesignResult {
+    poles: Complex[];
+    zeros: Complex[];
+    gain: number;
+    coeffs: number[];
+  }
+
+  const root = document.querySelector<HTMLElement>('[data-filter]');
+
+  if (root) {
+    const opt = (name: string) => root.querySelector<HTMLInputElement | HTMLSelectElement>(`[data-opt="${name}"]`)!;
+    const canvasOf = (name: string) => root.querySelector<HTMLCanvasElement>(`[data-plot="${name}"]`)!;
+    const statusEl = root.querySelector<HTMLElement>('[data-status]')!;
+    const coeffsEl = root.querySelector<HTMLElement>('[data-coeffs]')!;
+    const rippleField = root.querySelector<HTMLElement>('[data-ripple-field]')!;
+    const windowField = root.querySelector<HTMLElement>('[data-window-field]')!;
+
+    const css = (name: string, fallback: string) =>
+      getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+
+    /* ---------- 复数工具 ---------- */
+
+    const cadd = (a: Complex, b: Complex): Complex => ({ re: a.re + b.re, im: a.im + b.im });
+    const csub = (a: Complex, b: Complex): Complex => ({ re: a.re - b.re, im: a.im - b.im });
+    const cmul = (a: Complex, b: Complex): Complex => ({
+      re: a.re * b.re - a.im * b.im,
+      im: a.re * b.im + a.im * b.re,
+    });
+    const cdiv = (a: Complex, b: Complex): Complex => {
+      const den = b.re * b.re + b.im * b.im || 1e-12;
+      return { re: (a.re * b.re + a.im * b.im) / den, im: (a.im * b.re - a.re * b.im) / den };
+    };
+    const cabs = (a: Complex) => Math.hypot(a.re, a.im);
+    const csqrt = (a: Complex): Complex => {
+      const r = Math.hypot(a.re, a.im);
+      return {
+        re: Math.sqrt(Math.max(0, (r + a.re) / 2)),
+        im: Math.sign(a.im || 1) * Math.sqrt(Math.max(0, (r - a.re) / 2)),
+      };
+    };
+
+    /* ---------- 设计 ---------- */
+
+    /** 双线性变换：模拟极点 → 数字极点（T = 2，预畸变已有 cutoff 归一化） */
+    const bilinear = (p: Complex): Complex => cdiv({ re: 1 + p.re, im: p.im }, { re: 1 - p.re, im: -p.im });
+
+    /** 模拟低通原型极点（截止频率归一化为 1） */
+    function analogLowpassProto(design: Design, n: number, rippleDb: number) {
+      const poles: Complex[] = [];
+      if (design === 'butterworth') {
+        for (let k = 0; k < n; k += 1) {
+          const theta = (Math.PI * (2 * k + n + 1)) / (2 * n);
+          poles.push({ re: Math.cos(theta), im: Math.sin(theta) });
+        }
+        return { poles, gain: 1 };
+      }
+      // 切比雪夫 I 型
+      const eps = Math.sqrt(Math.pow(10, rippleDb / 10) - 1);
+      const a = Math.asinh(1 / eps) / n;
+      for (let k = 0; k < n; k += 1) {
+        const theta = (Math.PI * (2 * k + 1)) / (2 * n);
+        poles.push({ re: -Math.sinh(a) * Math.sin(theta), im: Math.cosh(a) * Math.cos(theta) });
+      }
+      // 偶数阶：直流增益等于通带纹波
+      return { poles, gain: n % 2 === 0 ? Math.pow(10, -rippleDb / 20) : 1 };
+    }
+
+    /**
+     * IIR 设计：模拟原型 → 频率变换 → 双线性变换。
+     *
+     * 关键点：双线性变换把 s=∞ 的零点映射到 z=−1。低通必须补上 n 个 z=−1 的零点，
+     * 否则通带不平、截止频率处的 −3 dB 也对不上（这是最初版本最大的错误）。
+     */
+    function designIIR(
+      kind: Kind,
+      design: Design,
+      order: number,
+      cutoff: number,
+      rippleDb: number,
+    ): DesignResult {
+      const n = Math.max(1, Math.min(12, Math.round(order)));
+      const wc = Math.tan((Math.PI * cutoff) / 2); // 预畸变：数字截止 → 模拟截止
+      const { poles: proto, gain: protoGain } = analogLowpassProto(design, n, rippleDb);
+
+      let analogPoles: Complex[];
+      let zeros: Complex[];
+      let probeW: number;
+
+      if (kind === 'lowpass') {
+        analogPoles = proto.map((p) => ({ re: p.re * wc, im: p.im * wc }));
+        zeros = Array.from({ length: n }, () => ({ re: -1, im: 0 }));
+        probeW = 0;
+      } else if (kind === 'highpass') {
+        // s → wc/s：极点取倒数；s=∞ 的零点移到 s=0，双线性后落在 z=+1
+        analogPoles = proto.map((p) => cdiv({ re: wc, im: 0 }, p));
+        zeros = Array.from({ length: n }, () => ({ re: 1, im: 0 }));
+        probeW = Math.PI;
+      } else {
+        // 带通：s_lp → (s² + Ω0²)/(B·s)，每个原型极点解一个二次方程
+        const b = wc * 0.6;
+        const w0sq = wc * wc;
+        analogPoles = [];
+        for (const p of proto) {
+          const bp = { re: p.re * b, im: p.im * b };
+          const disc = csub(cmul(bp, bp), { re: 4 * w0sq, im: 0 });
+          const root = csqrt(disc);
+          analogPoles.push(cdiv(cadd(bp, root), { re: 2, im: 0 }));
+          analogPoles.push(cdiv(csub(bp, root), { re: 2, im: 0 }));
+        }
+        zeros = [
+          ...Array.from({ length: n }, () => ({ re: 1, im: 0 })),
+          ...Array.from({ length: n }, () => ({ re: -1, im: 0 })),
+        ];
+        probeW = Math.PI * cutoff;
+      }
+
+      const poles = analogPoles.map(bilinear);
+      const raw = cabs(responseAt(zeros, poles, 1, probeW)) || 1e-12;
+      const gain = protoGain / raw;
+
+      return { poles, zeros, gain, coeffs: [] };
+    }
+    function designFIR(kind: Kind, order: number, cutoff: number, window: WindowName): DesignResult {
+      const n = Math.max(2, Math.min(12, Math.round(order)) * 8 + 1); // 抽头数，奇数保证线性相位
+      const m = n - 1;
+      const wc = Math.PI * cutoff;
+
+      const win = (i: number) => {
+        const t = (2 * Math.PI * i) / m;
+        if (window === 'hann') return 0.5 - 0.5 * Math.cos(t);
+        if (window === 'blackman') return 0.42 - 0.5 * Math.cos(t) + 0.08 * Math.cos(2 * t);
+        return 0.54 - 0.46 * Math.cos(t); // hamming
+      };
+
+      const lp: number[] = [];
+      for (let i = 0; i < n; i += 1) {
+        const k = i - m / 2;
+        const ideal = k === 0 ? wc / Math.PI : Math.sin(wc * k) / (Math.PI * k);
+        lp.push(ideal * win(i));
+      }
+
+      let h = lp;
+      if (kind === 'highpass') {
+        h = lp.map((v, i) => (i === m / 2 ? 1 - v : -v));
+      } else if (kind === 'bandpass') {
+        // 两个低通相减得到带通
+        const wc2 = Math.PI * Math.min(0.95, cutoff * 2);
+        h = lp.map((v, i) => {
+          const k = i - m / 2;
+          const ideal = k === 0 ? wc2 / Math.PI : Math.sin(wc2 * k) / (Math.PI * k);
+          return ideal * win(i) - v;
+        });
+      }
+
+      // 从 DTFT 求零点、极点（FIR 只有零点）
+      const zeros: Complex[] = [];
+      // 用 512 点 DFT 近似极点分布太粗糙，这里只展示系数与频响
+      return { poles: [], zeros, gain: 1, coeffs: h };
+    }
+
+    /** H(e^{jw}) = gain · Π(z − z_k) / Π(z − p_k)，z = e^{jw} */
+    function responseAt(zeros: Complex[], poles: Complex[], gain: number, w: number): Complex {
+      const z: Complex = { re: Math.cos(w), im: -Math.sin(w) };
+      let num: Complex = { re: gain, im: 0 };
+      for (const zero of zeros) num = cmul(num, csub(z, zero));
+      let den: Complex = { re: 1, im: 0 };
+      for (const pole of poles) den = cmul(den, csub(z, pole));
+      return cdiv(num, den);
+    }
+
+    /** FIR 用系数直接算频响 */
+    function firResponse(coeffs: number[], w: number): Complex {
+      let sum: Complex = { re: 0, im: 0 };
+      for (let i = 0; i < coeffs.length; i += 1) {
+        sum = cadd(sum, {
+          re: coeffs[i] * Math.cos(-w * i),
+          im: coeffs[i] * Math.sin(-w * i),
+        });
+      }
+      return sum;
+    }
+
+    /* ---------- 绘图 ---------- */
+
+    function setupCanvas(canvas: HTMLCanvasElement) {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width || canvas.width;
+      const h = rect.height || canvas.height;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      const ctx = canvas.getContext('2d')!;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx, w, h };
+    }
+
+    function drawAxes(ctx: CanvasRenderingContext2D, w: number, h: number, pad: number) {
+      const line = css('--line', '#d8e0ea');
+      const muted = css('--muted', '#6b7280');
+      ctx.clearRect(0, 0, w, h);
+      ctx.strokeStyle = line;
+      ctx.lineWidth = 1;
+      ctx.font = '10px ui-monospace, monospace';
+      ctx.fillStyle = muted;
+
+      for (let i = 0; i <= 5; i += 1) {
+        const x = pad + ((w - pad * 2) * i) / 5;
+        ctx.beginPath();
+        ctx.moveTo(x, pad);
+        ctx.lineTo(x, h - pad);
+        ctx.globalAlpha = 0.35;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.textAlign = 'center';
+        ctx.fillText((i / 5).toFixed(1), x, h - pad + 13);
+      }
+    }
+
+    function drawMagnitude(samples: Array<{ w: number; db: number }>) {
+      const canvas = canvasOf('magnitude');
+      const { ctx, w, h } = setupCanvas(canvas);
+      const pad = 34;
+      drawAxes(ctx, w, h, pad);
+
+      const accent = css('--accent', '#1b4fa8');
+      const line = css('--line', '#d8e0ea');
+      const minDb = -72;
+      const maxDb = 6;
+      const toY = (db: number) =>
+        pad + ((maxDb - Math.max(minDb, Math.min(maxDb, db))) / (maxDb - minDb)) * (h - pad * 2);
+
+      // 0 dB 参考线
+      ctx.beginPath();
+      ctx.moveTo(pad, toY(0));
+      ctx.lineTo(w - pad, toY(0));
+      ctx.strokeStyle = line;
+      ctx.setLineDash([4, 4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 通带标记
+      ctx.beginPath();
+      samples.forEach((s, i) => {
+        const x = pad + (s.w / Math.PI) * (w - pad * 2);
+        const y = toY(s.db);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    function drawPhase(samples: Array<{ w: number; phase: number }>) {
+      const canvas = canvasOf('phase');
+      const { ctx, w, h } = setupCanvas(canvas);
+      const pad = 34;
+      drawAxes(ctx, w, h, pad);
+
+      const accent = css('--accent', '#1b4fa8');
+      const toY = (deg: number) => pad + ((180 - deg) / 360) * (h - pad * 2);
+
+      ctx.beginPath();
+      samples.forEach((s, i) => {
+        const x = pad + (s.w / Math.PI) * (w - pad * 2);
+        const y = toY(s.phase);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1.6;
+      ctx.globalAlpha = 0.85;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    function drawPoleZero(poles: Complex[], zeros: Complex[]) {
+      const canvas = canvasOf('pz');
+      const { ctx, w, h } = setupCanvas(canvas);
+      const size = Math.min(w, h);
+      const cx = w / 2;
+      const cy = h / 2;
+      const r = size * 0.38;
+
+      const line = css('--line', '#d8e0ea');
+      const muted = css('--muted', '#6b7280');
+      const accent = css('--accent', '#1b4fa8');
+
+      ctx.clearRect(0, 0, w, h);
+
+      // 单位圆
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.strokeStyle = muted;
+      ctx.lineWidth = 1.2;
+      ctx.globalAlpha = 0.6;
+      ctx.stroke();
+
+      // 坐标轴
+      ctx.beginPath();
+      ctx.moveTo(cx - r * 1.1, cy);
+      ctx.lineTo(cx + r * 1.1, cy);
+      ctx.moveTo(cx, cy - r * 1.1);
+      ctx.lineTo(cx, cy + r * 1.1);
+      ctx.strokeStyle = line;
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.8;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      const place = (c: Complex): [number, number] => [cx + c.re * r, cy - c.im * r];
+
+      // 零点：空心圈
+      for (const zero of zeros) {
+        const [x, y] = place(zero);
+        ctx.beginPath();
+        ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 1.6;
+        ctx.stroke();
+      }
+
+      // 极点：实心叉
+      for (const pole of poles) {
+        const [x, y] = place(pole);
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(x - 4.5, y - 4.5);
+        ctx.lineTo(x + 4.5, y + 4.5);
+        ctx.moveTo(x + 4.5, y - 4.5);
+        ctx.lineTo(x - 4.5, y + 4.5);
+        ctx.stroke();
+      }
+    }
+
+    /* ---------- 主流程 ---------- */
+
+    function build() {
+      const kind = opt('kind').value as Kind;
+      const design = opt('design').value as Design;
+      const order = Number(opt('order').value);
+      const cutoff = Math.max(0.05, Math.min(0.95, Number(opt('cutoff').value)));
+      const ripple = Number(opt('ripple').value);
+      const window = opt('window').value as WindowName;
+
+      // 按设计方法显示/隐藏专属参数
+      rippleField.hidden = design !== 'chebyshev';
+      windowField.hidden = design !== 'fir';
+
+      const result = design === 'fir'
+        ? designFIR(kind, order, cutoff, window)
+        : designIIR(kind, design, order, cutoff, ripple);
+
+      // 稳定性检查（IIR）
+      const unstable = result.poles.some((p) => cabs(p) > 1.0001);
+      statusEl.hidden = !unstable;
+      if (unstable) statusEl.textContent = (root.dataset.unstable ?? '').trim() || 'Unstable';
+
+      // 采样频响
+      const steps = 512;
+      const magSamples: Array<{ w: number; db: number }> = [];
+      const phaseSamples: Array<{ w: number; phase: number }> = [];
+
+      for (let i = 0; i <= steps; i += 1) {
+        const w = (Math.PI * i) / steps;
+        const h = design === 'fir'
+          ? firResponse(result.coeffs, w)
+          : responseAt(result.zeros, result.poles, result.gain, w);
+        const mag = cabs(h) || 1e-12;
+        magSamples.push({ w, db: 20 * Math.log10(mag) });
+        phaseSamples.push({ w, phase: (Math.atan2(h.im, h.re) * 180) / Math.PI });
+      }
+
+      drawMagnitude(magSamples);
+      drawPhase(phaseSamples);
+
+      // FIR 只有零点、没有极点，零极点图对它没有意义
+      const pzFigure = canvasOf('pz').closest('figure') as HTMLElement | null;
+      if (pzFigure) pzFigure.hidden = design === 'fir';
+      if (design !== 'fir') drawPoleZero(result.poles, result.zeros);
+
+      // 系数
+      if (result.coeffs.length > 0) {
+        coeffsEl.textContent = result.coeffs.map((v) => v.toFixed(6)).join('\n');
+      } else {
+        coeffsEl.textContent = `poles × ${result.poles.length}, zeros × ${result.zeros.length}`;
+      }
+    }
+
+    for (const el of root.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[data-opt]')) {
+      el.addEventListener('change', build);
+      el.addEventListener('input', build);
+    }
+
+    build();
+
+    const observer = new ResizeObserver(() => build());
+    observer.observe(canvasOf('magnitude'));
+
+    document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
+      window.setTimeout(build, 30);
+    });
+  }
+</script>

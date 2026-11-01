@@ -1,0 +1,392 @@
+---
+import type { Locale } from '../../i18n/config';
+import { localizedPath } from '../../i18n/config';
+import { pomodoroCopy } from '../../i18n/tools';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const copy = pomodoroCopy[locale];
+const modes: Array<{ id: 'focus' | 'short' | 'long'; label: string }> = [
+  { id: 'focus', label: copy.modes.focus },
+  { id: 'short', label: copy.modes.short },
+  { id: 'long', label: copy.modes.long },
+];
+const CIRCUMFERENCE = (2 * Math.PI * 54).toFixed(2);
+---
+
+<div
+  class="pomodoro"
+  data-pomodoro
+  data-copy={JSON.stringify({
+    start: copy.actions.start,
+    pause: copy.actions.pause,
+    resume: copy.actions.resume,
+    modes: copy.modes,
+    round: copy.round,
+  })}
+>
+  <div class="pomodoro-modes" role="group" aria-label={copy.modes.focus}>
+    {modes.map((mode) => (
+      <button type="button" data-mode-btn={mode.id} aria-pressed={mode.id === 'focus' ? 'true' : 'false'}>
+        {mode.label}
+      </button>
+    ))}
+  </div>
+
+  <div class="pomodoro-dial">
+    <svg viewBox="0 0 120 120" aria-hidden="true">
+      <circle class="pomodoro-track" cx="60" cy="60" r="54"></circle>
+      <circle
+        class="pomodoro-progress"
+        cx="60"
+        cy="60"
+        r="54"
+        stroke-dasharray={CIRCUMFERENCE}
+        stroke-dashoffset="0"
+        data-progress></circle>
+    </svg>
+    <div class="pomodoro-face">
+      <div class="pomodoro-time" data-time aria-live="off">25:00</div>
+      <div class="pomodoro-state" data-state>{copy.modes.focus}</div>
+    </div>
+  </div>
+
+  <div class="pomodoro-actions">
+    <button class="button button--solid" type="button" data-action="toggle">{copy.actions.start}</button>
+    <button class="button" type="button" data-action="reset">{copy.actions.reset}</button>
+    <button class="button" type="button" data-action="skip">{copy.actions.skip}</button>
+  </div>
+
+  <div class="pomodoro-meta">
+    <span>{copy.round} <b data-round>1</b></span>
+    <span>{copy.roundsDone} <b data-done>0</b></span>
+  </div>
+
+  <div class="pomodoro-settings">
+    <label class="pomodoro-field">
+      <span>{copy.focusMinutes}</span>
+      <input type="number" min="1" max="120" step="1" value="25" data-setting="focus" />
+    </label>
+    <label class="pomodoro-field">
+      <span>{copy.shortMinutes}</span>
+      <input type="number" min="1" max="60" step="1" value="5" data-setting="short" />
+    </label>
+    <label class="pomodoro-field">
+      <span>{copy.longMinutes}</span>
+      <input type="number" min="1" max="90" step="1" value="15" data-setting="long" />
+    </label>
+    <label class="pomodoro-field">
+      <span>{copy.longEvery}</span>
+      <input type="number" min="2" max="12" step="1" value="4" data-setting="longEvery" />
+    </label>
+  </div>
+
+
+  <p class="tool-note">{copy.hint}</p>
+</div>
+
+<script>
+  type Mode = 'focus' | 'short' | 'long';
+
+  interface Settings {
+    focus: number;
+    short: number;
+    long: number;
+    longEvery: number;
+  }
+
+  interface Persisted {
+    mode: Mode;
+    rounds: number;
+    done: number;
+    running: boolean;
+    endsAt: number;
+    settings: Settings;
+  }
+
+  const STORAGE_KEY = 'orbit-pomodoro';
+  const CIRCUMFERENCE = 2 * Math.PI * 54;
+  const DEFAULTS: Settings = { focus: 25, short: 5, long: 15, longEvery: 4 };
+
+  const root = document.querySelector<HTMLElement>('[data-pomodoro]');
+
+  if (root) {
+    const copy = JSON.parse(root.dataset.copy ?? '{}') as {
+      start: string;
+      pause: string;
+      resume: string;
+      modes: Record<Mode, string>;
+      round: string;
+    };
+
+    const timeEl = root.querySelector<HTMLElement>('[data-time]')!;
+    const stateEl = root.querySelector<HTMLElement>('[data-state]')!;
+    const progressEl = root.querySelector<SVGCircleElement>('[data-progress]')!;
+    const roundEl = root.querySelector<HTMLElement>('[data-round]')!;
+    const doneEl = root.querySelector<HTMLElement>('[data-done]')!;
+    const toggleBtn = root.querySelector<HTMLButtonElement>('[data-action="toggle"]')!;
+    const modeButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-mode-btn]'));
+    const settingInputs = Array.from(root.querySelectorAll<HTMLInputElement>('[data-setting]'));
+
+    const baseTitle = document.title;
+    let settings: Settings = { ...DEFAULTS };
+    let mode: Mode = 'focus';
+    let rounds = 1;
+    let done = 0;
+    let running = false;
+    /** 运行中记录结束时间戳；标签页休眠回来时间依然正确 */
+    let endsAt = 0;
+    let remaining = DEFAULTS.focus * 60;
+    let ticker: number | undefined;
+
+    const minutesOf = (m: Mode) => settings[m];
+    const totalOf = (m: Mode) => minutesOf(m) * 60;
+
+    function load() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw) as Partial<Persisted>;
+        if (saved.settings) settings = { ...DEFAULTS, ...saved.settings };
+        if (saved.mode) mode = saved.mode;
+        if (typeof saved.rounds === 'number') rounds = saved.rounds;
+        if (typeof saved.done === 'number') done = saved.done;
+        if (saved.running && saved.endsAt) {
+          // 关页面前在跑：按真实时间续上
+          const left = Math.round((saved.endsAt - Date.now()) / 1000);
+          if (left > 0) {
+            running = true;
+            endsAt = saved.endsAt;
+            remaining = left;
+          } else {
+            remaining = 0;
+          }
+        } else {
+          remaining = totalOf(mode);
+        }
+      } catch {
+        // 存储坏了就用默认值
+      }
+    }
+
+    function save() {
+      const data: Persisted = { mode, rounds, done, running, endsAt, settings };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch {
+        // 忽略：无痕模式下写不进去
+      }
+    }
+
+    function format(seconds: number) {
+      const s = Math.max(0, seconds);
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+    }
+
+    function render() {
+      timeEl.textContent = format(running ? remaining : Math.round(remaining));
+      stateEl.textContent = copy.modes[mode];
+      roundEl.textContent = String(rounds);
+      doneEl.textContent = String(done);
+      toggleBtn.textContent = running ? copy.pause : remaining < totalOf(mode) ? copy.resume : copy.start;
+
+      for (const button of modeButtons) {
+        button.setAttribute('aria-pressed', button.dataset.modeBtn === mode ? 'true' : 'false');
+      }
+
+      const total = totalOf(mode);
+      const fraction = total > 0 ? Math.min(1, Math.max(0, remaining / total)) : 0;
+      progressEl.style.strokeDashoffset = String(CIRCUMFERENCE * (1 - fraction));
+
+      // 标签页上也能看到剩余时间（保留站点标题）
+      const active = running || remaining > 0 && remaining < total;
+      document.title = active
+        ? `${format(Math.round(remaining))} · ${copy.modes[mode]} · ${baseTitle}`
+        : baseTitle;
+    }
+
+    function stopTicker() {
+      if (ticker !== undefined) {
+        window.clearInterval(ticker);
+        ticker = undefined;
+      }
+    }
+
+    /** 复用一个 AudioContext：每次新建会被浏览器策略拦掉，也可能延迟起音 */
+    let audioCtx: AudioContext | undefined;
+
+    const ensureAudio = () => {
+      if (!audioCtx) {
+        const Ctx =
+          window.AudioContext ??
+          (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+        if (!Ctx) return undefined;
+        audioCtx = new Ctx();
+      }
+      if (audioCtx.state === 'suspended') void audioCtx.resume();
+      return audioCtx;
+    };
+
+    /** 一声短促的提示音 */
+    function tone(ctx: AudioContext, frequency: number, at: number, duration: number, volume = 0.32) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(frequency, at);
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(volume, at + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + duration);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(at);
+      osc.stop(at + duration + 0.02);
+    }
+
+    /**
+     * 结束提示：专注结束用上行三音（该休息了），休息结束用下行两音（回来干活）。
+     */
+    function chime(kind: 'focusDone' | 'breakDone') {
+      try {
+        const ctx = ensureAudio();
+        if (!ctx) return;
+        const t0 = ctx.currentTime + 0.02;
+        if (kind === 'focusDone') {
+          [660, 880, 1320].forEach((f, i) => tone(ctx, f, t0 + i * 0.18, 0.42));
+        } else {
+          [880, 660].forEach((f, i) => tone(ctx, f, t0 + i * 0.2, 0.46));
+        }
+      } catch {
+        // 被策略拦掉就静默失败，不影响计时
+      }
+    }
+
+    function startTicker() {
+      stopTicker();
+      ticker = window.setInterval(() => {
+        const left = Math.round((endsAt - Date.now()) / 1000);
+        remaining = Math.max(0, left);
+        if (remaining <= 0) {
+          complete();
+          return;
+        }
+        render();
+      }, 250);
+    }
+
+    function nextMode(): Mode {
+      if (mode !== 'focus') return 'focus';
+      return rounds % settings.longEvery === 0 ? 'long' : 'short';
+    }
+
+    function complete() {
+      chime(mode === 'focus' ? 'focusDone' : 'breakDone');
+
+      if (mode === 'focus') {
+        done += 1;
+        const next = nextMode();
+        rounds += 1;
+        mode = next;
+      } else {
+        mode = 'focus';
+      }
+
+      running = false;
+      endsAt = 0;
+      remaining = totalOf(mode);
+      stopTicker();
+      render();
+      save();
+    }
+
+    function toggle() {
+      if (running) {
+        // 暂停：把剩余秒数固化下来
+        running = false;
+        stopTicker();
+        save();
+        render();
+        return;
+      }
+
+      if (remaining <= 0) remaining = totalOf(mode);
+      endsAt = Date.now() + remaining * 1000;
+      running = true;
+      startTicker();
+      render();
+      save();
+    }
+
+    function switchMode(next: Mode) {
+      mode = next;
+      running = false;
+      stopTicker();
+      remaining = totalOf(next);
+      endsAt = 0;
+      render();
+      save();
+    }
+
+    function reset() {
+      running = false;
+      stopTicker();
+      remaining = totalOf(mode);
+      endsAt = 0;
+      render();
+      save();
+    }
+
+    function skip() {
+      complete();
+    }
+
+    toggleBtn.addEventListener('click', toggle);
+
+    root.querySelector('[data-action="reset"]')?.addEventListener('click', reset);
+    root.querySelector('[data-action="skip"]')?.addEventListener('click', skip);
+
+    for (const button of modeButtons) {
+      button.addEventListener('click', () => switchMode(button.dataset.modeBtn as Mode));
+    }
+
+    for (const input of settingInputs) {
+      const key = input.dataset.setting as keyof Settings;
+      input.addEventListener('change', () => {
+        const value = Number(input.value);
+        if (!Number.isFinite(value)) return;
+        const min = Number(input.min);
+        const max = Number(input.max);
+        const clamped = Math.min(max, Math.max(min, Math.round(value)));
+        input.value = String(clamped);
+        settings = { ...settings, [key]: clamped };
+
+        // 正在休息时改时长，直接应用到当前剩余时间
+        if (!running) {
+          remaining = totalOf(mode);
+        }
+        render();
+        save();
+      });
+    }
+
+    load();
+    for (const input of settingInputs) {
+      const key = input.dataset.setting as keyof Settings;
+      input.value = String(settings[key]);
+    }
+    if (running) startTicker();
+    render();
+
+    // 标签页重新可见时校正一次，避免后台节流导致偏差
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && running) {
+        remaining = Math.max(0, Math.round((endsAt - Date.now()) / 1000));
+        if (remaining <= 0) complete();
+        else render();
+      }
+    });
+  }
+</script>

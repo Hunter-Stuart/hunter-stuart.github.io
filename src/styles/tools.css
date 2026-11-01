@@ -1,0 +1,304 @@
+/* ==========================================================================
+   工具页
+   ========================================================================== */
+
+.tool-page {
+  padding-block: clamp(2.5rem, 7vh, 4.5rem) clamp(3rem, 8vh, 5rem);
+}
+
+.tool-head {
+  display: grid;
+  gap: 0.6rem;
+  max-width: 52rem;
+  margin-bottom: clamp(1.75rem, 4vh, 2.75rem);
+}
+
+.tool-head h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4.2vw, 2.9rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.tool-head p {
+  color: var(--muted);
+  font-size: 0.98rem;
+}
+
+.tool-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.tool-breadcrumb a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.tool-breadcrumb a:hover {
+  color: var(--accent);
+}
+
+/* ---------- 工具列表 ---------- */
+
+.tool-grid {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  /* 同一行等高：新增工具自动沿用，不需要逐个写高度 */
+  grid-auto-rows: 1fr;
+  list-style: none;
+}
+
+.tool-grid > li {
+  display: grid;
+}
+
+.tool-card {
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+  /* 统一尺寸：填满所在格 + 最小高度，描述长短不再影响卡片大小 */
+  height: 100%;
+  min-height: 11rem;
+  padding: 1.25rem 1.3rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.tool-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.tool-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+}
+
+.tool-card h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.tool-card p {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  /* 描述最多 3 行，超出省略，保证高度一致 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+/* ---------- 番茄钟 ---------- */
+
+.pomodoro {
+  display: grid;
+  gap: clamp(1.5rem, 4vh, 2.5rem);
+  justify-items: center;
+}
+
+.pomodoro-modes {
+  display: inline-flex;
+  padding: 0.22rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  gap: 0.15rem;
+}
+
+.pomodoro-modes button {
+  padding: 0.42rem 1rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.pomodoro-modes button[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--page);
+}
+
+.pomodoro-dial {
+  position: relative;
+  width: min(66vw, 17rem);
+  aspect-ratio: 1;
+}
+
+.pomodoro-dial svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.pomodoro-track {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 6;
+}
+
+.pomodoro-progress {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 260ms linear;
+}
+
+.pomodoro-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.pomodoro-time {
+  font-family: var(--font-mono);
+  font-size: clamp(2.4rem, 7vw, 3.4rem);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.pomodoro-state {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.pomodoro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.pomodoro-actions .button {
+  min-width: 6rem;
+  justify-content: center;
+}
+
+.pomodoro-settings {
+  display: grid;
+  gap: 0.75rem 1.25rem;
+  width: 100%;
+  max-width: 34rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 7.5rem), 1fr));
+}
+
+.pomodoro-field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.pomodoro-field span {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pomodoro-field input {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+.pomodoro-field input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+
+.pomodoro-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pomodoro-meta b {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.tool-note {
+  max-width: 40rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+/* ---------- 通用面板 ---------- */
+
+.tool-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.tool-canvas-wrap {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.tool-canvas-wrap canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: none;
+}
+
+@media (max-width: 40rem) {
+  .pomodoro-settings {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

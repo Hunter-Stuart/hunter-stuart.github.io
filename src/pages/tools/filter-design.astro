@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FilterDesign from '../../components/tools/FilterDesign.astro';
+import ToolShell from '../../components/tools/ToolShell.astro';
+import { filterCopy } from '../../i18n/tools';
+import '../../styles/tools.css';
+import '../../styles/tools-extra.css';
+
+const locale = 'zh' as const;
+const copy = filterCopy[locale];
+---
+
+<BaseLayout locale={locale} title={copy.title} description={copy.intro} alternatePath="/tools/filter-design">
+  <ToolShell locale={locale} title={copy.title} description={copy.intro}>
+    <FilterDesign {locale} />
+  </ToolShell>
+</BaseLayout>

@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { toolsIndexCopy } from '../../../i18n/tools';
+import '../../../styles/tools.css';
+
+const locale = 'en' as const;
+const copy = toolsIndexCopy[locale];
+---
+
+<BaseLayout locale={locale} title={copy.title} description={copy.intro} alternatePath="/tools">
+  <main id="main-content" class="tool-page">
+    <div class="shell">
+      <header class="tool-head">
+        <p class="eyebrow">{copy.overline}</p>
+        <h1>{copy.title}</h1>
+        <p>{copy.intro}</p>
+      </header>
+
+      <ul class="tool-grid">
+        {copy.items.map((item) => (
+          <li>
+            <a class="tool-card" href={`/en/tools/${item.slug}`}>
+              <span class="tool-card-top">
+                <span>{item.tag}</span>
+                <span aria-hidden="true">↗</span>
+              </span>
+              <h2>{item.name}</h2>
+              <p>{item.desc}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </main>
+</BaseLayout>

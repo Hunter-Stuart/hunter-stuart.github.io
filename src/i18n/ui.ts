@@ -9,6 +9,7 @@ export interface UiCopy {
     profile: string;
     posts: string;
     friends: string;
+    tools: string;
   };
   navLabel: string;
   mobileNavLabel: string;
@@ -47,7 +48,7 @@ export interface UiCopy {
 export const ui: Record<Locale, UiCopy> = {
   zh: {
     skipToContent: '跳到主要内容',
-    nav: { home: '首页', blog: '博客', profile: '个人简历', posts: '全部日志', friends: '友链' },
+    nav: { home: '首页', blog: '博客', profile: '个人简历', posts: '全部日志', friends: '友链', tools: '工具' },
     navLabel: '主导航',
     mobileNavLabel: '移动导航',
     menuOpen: '打开导航菜单',
@@ -84,7 +85,7 @@ export const ui: Record<Locale, UiCopy> = {
   },
   en: {
     skipToContent: 'Skip to content',
-    nav: { home: 'Home', blog: 'Blog', profile: 'Résumé', posts: 'All posts', friends: 'Friends' },
+    nav: { home: 'Home', blog: 'Blog', profile: 'Résumé', posts: 'All posts', friends: 'Friends', tools: 'Tools' },
     navLabel: 'Main navigation',
     mobileNavLabel: 'Mobile navigation',
     menuOpen: 'Open menu',

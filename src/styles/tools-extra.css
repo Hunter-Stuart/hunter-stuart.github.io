@@ -1,0 +1,240 @@
+/* ==========================================================================
+   史密斯圆图
+   ========================================================================== */
+
+.smith {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+  align-items: start;
+}
+
+@media (min-width: 62rem) {
+  .smith {
+    grid-template-columns: minmax(0, 1fr) 17rem;
+  }
+}
+
+.smith-canvas-wrap {
+  aspect-ratio: 1;
+  max-width: 34rem;
+}
+
+.smith-side {
+  display: grid;
+  gap: 1.25rem;
+  align-content: start;
+}
+
+.smith-inputs {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.smith-readout {
+  display: grid;
+  margin: 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  gap: 0.45rem 1rem;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.smith-readout dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.smith-readout dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   滤波器设计
+   ========================================================================== */
+
+.filter-tool {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+
+.filter-controls {
+  display: grid;
+  gap: 0.75rem 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+}
+
+.pomodoro-field select {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+}
+
+.pomodoro-field select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.filter-status {
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: var(--accent);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.filter-plots {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.filter-plot {
+  display: grid;
+  margin: 0;
+  gap: 0.5rem;
+}
+
+.filter-plot figcaption {
+  color: var(--muted);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.filter-plot--pz {
+  max-width: 24rem;
+}
+
+.filter-coeffs {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.filter-coeffs summary {
+  color: var(--muted);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.filter-coeffs summary:hover {
+  color: var(--accent);
+}
+
+.filter-coeffs pre {
+  margin: 0.75rem 0 0;
+  max-height: 14rem;
+  overflow: auto;
+  font-size: 0.74rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+/* ---------- 史密斯圆图（SVG 版） ---------- */
+
+.smith-figure {
+  display: grid;
+  margin: 0;
+  gap: 0.75rem;
+}
+
+.smith-canvas-wrap {
+  aspect-ratio: 1;
+  max-width: 34rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.smith-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.smith-rim {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1.4;
+  opacity: 0.75;
+}
+
+.smith-axis {
+  stroke: var(--line);
+  stroke-width: 1.4;
+}
+
+.smith-grid {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 0.7;
+  opacity: 0.6;
+}
+
+.smith-grid--major {
+  stroke: var(--muted);
+  stroke-width: 1;
+  opacity: 0.85;
+}
+
+.smith-grid--reactance {
+  stroke-dasharray: 4 4;
+}
+
+.smith-label {
+  fill: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+.smith-label--key {
+  fill: var(--text);
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.smith-label--faint {
+  opacity: 0.55;
+}
+
+.smith-label--dot {
+  fill: var(--accent);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.smith-radius {
+  stroke: var(--accent);
+  stroke-width: 1.4;
+  opacity: 0.5;
+}
+
+.smith-dot {
+  fill: var(--accent);
+  stroke: var(--surface);
+  stroke-width: 2.5;
+}
+
+.smith-legend {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+}

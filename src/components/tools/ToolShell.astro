@@ -1,0 +1,31 @@
+---
+import type { Locale } from '../../i18n/config';
+import { localizedPath } from '../../i18n/config';
+import { toolsIndexCopy } from '../../i18n/tools';
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description?: string;
+}
+
+const { locale, title, description } = Astro.props;
+const copy = toolsIndexCopy[locale];
+---
+
+<main id="main-content" class="tool-page">
+  <div class="shell">
+    <nav class="tool-breadcrumb" aria-label="breadcrumb">
+      <a href={localizedPath(locale, '/tools')}>{copy.title}</a>
+      <span aria-hidden="true">/</span>
+      <span>{title}</span>
+    </nav>
+
+    <header class="tool-head">
+      <h1>{title}</h1>
+      {description && <p>{description}</p>}
+    </header>
+
+    <slot />
+  </div>
+</main>

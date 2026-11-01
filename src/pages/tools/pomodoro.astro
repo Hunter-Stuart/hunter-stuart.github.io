@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Pomodoro from '../../components/tools/Pomodoro.astro';
+import ToolShell from '../../components/tools/ToolShell.astro';
+import { pomodoroCopy } from '../../i18n/tools';
+import '../../styles/tools.css';
+
+const locale = 'zh' as const;
+const copy = pomodoroCopy[locale];
+---
+
+<BaseLayout locale={locale} title={copy.title} description={copy.intro} alternatePath="/tools/pomodoro">
+  <ToolShell locale={locale} title={copy.title} description={copy.intro}>
+    <Pomodoro {locale} />
+  </ToolShell>
+</BaseLayout>

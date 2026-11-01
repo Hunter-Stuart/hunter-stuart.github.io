@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SmithChartTool from '../../../components/islands/SmithChartTool';
+import { smithCopy } from '../../../i18n/tools';
+import '../../../styles/tools.css';
+import '../../../styles/smith.css';
+
+const locale = 'en' as const;
+const copy = smithCopy[locale];
+---
+
+<BaseLayout
+  locale={locale}
+  title={copy.title}
+  description={copy.intro}
+  alternatePath="/tools/smith-chart"
+>
+  <main id="main-content" class="tool-page tool-page-smith">
+    <div class="shell">
+      <header class="tool-head">
+        <p class="eyebrow">RF / INSTRUMENT</p>
+        <h1>{copy.title}</h1>
+        <p>{copy.intro}</p>
+      </header>
+
+      <SmithChartTool locale={locale} client:load />
+    </div>
+  </main>
+</BaseLayout>
