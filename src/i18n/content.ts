@@ -22,7 +22,7 @@ export const identity: Record<Locale, SiteIdentity> = {
     name: 'Hunter Stuart',
     localName: '郝瀚宇',
     kicker: '六段轨道，一本日志',
-    title: '郝瀚宇 — 一个人的发射日志',
+    title: '郝瀚宇 — 成长日记',
     description: '技术、项目与生活，按离地高度编排的六段轨道。',
     intro:
       '我是郝瀚宇，也叫 Hunter Stuart。这里记录工程笔记、做过的项目，以及那些在深夜想到、白天又忘记的问题。',
@@ -38,7 +38,7 @@ export const identity: Record<Locale, SiteIdentity> = {
     name: 'Hunter Stuart',
     localName: '郝瀚宇',
     kicker: 'SIX ORBITS, ONE LOG',
-    title: 'Hunter Stuart — A Personal Flight Log',
+    title: 'Hunter Stuart — A Growth Journal',
     description:
       'Notes on engineering, projects and everyday life, arranged by altitude above the ground.',
     intro:
