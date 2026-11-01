@@ -101,6 +101,10 @@ export const catalog: Record<Locale, Catalog> = {
       { name: '小登王', realName: '王登宇', note: '可爱小登王的个人主页', href: 'https://xiaodengwang01.github.io' },
       { name: '林宇祥的技术博客', note: '技术笔记与思考', href: 'https://sevenfriends.xtkx.site/' },
       { name: 'Fabbo', note: 'Fabbo喵~', href: 'https://fabbo.cc' },
+      { name: 'LeetCode', note: '刷题记录与算法笔记', href: 'https://leetcode.cn/problemset/' },
+      { name: '菜鸟教程', note: '学习编程的入门网站', href: 'https://www.runoob.com/' },
+      { name: '母校UESTC', note: '电子科技大学', href: 'https://www.uestc.edu.cn/' },
+      { name: 'books', note: 'Z-Library 电子书下载', href: 'https://z-lib.org/' },
     ],
   },
   en: {
@@ -174,6 +178,10 @@ export const catalog: Record<Locale, Catalog> = {
       { name: '小登王', realName: '王登宇', note: 'A very cute personal homepage', href: 'https://xiaodengwang01.github.io' },
       { name: '林宇祥的技术博客', note: 'Technical notes and thoughts', href: 'https://sevenfriends.xtkx.site/' },
       { name: 'Fabbo', note: 'Fabbo, meow~', href: 'https://fabbo.cc' },
+      { name: 'LeetCode', note: '刷题记录与算法笔记', href: 'https://leetcode.cn/problemset/' },
+      { name: '菜鸟教程', note: '学习编程的入门网站', href: 'https://www.runoob.com/' },
+      { name: '母校UESTC', note: '电子科技大学', href: 'https://www.uestc.edu.cn/' },
+      { name: 'books', note: 'Z-Library e-book downloads', href: 'https://z-lib.org/' },
     ],
   },
 };
