@@ -1,0 +1,71 @@
+---
+import Rocket from '../Rocket.astro';
+import { orbitVars, tracks } from '../../../data/tracks';
+
+// 05 地球同步轨道 · 35,786 KM —— 一整个地球、一条同步环，和沿着环运行的卫星。
+const track = tracks.geostationary;
+const orbit = track.orbit!;
+---
+
+<svg
+  viewBox="0 0 1440 900"
+  preserveAspectRatio="xMidYMid slice"
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <g class="scene-star">
+    <circle cx="112" cy="146" r="1.3"></circle>
+    <circle cx="264" cy="78" r="1"></circle>
+    <circle cx="392" cy="232" r="1.2"></circle>
+    <circle cx="520" cy="112" r="1"></circle>
+    <circle cx="648" cy="206" r="1.4"></circle>
+    <circle cx="778" cy="96" r="1"></circle>
+    <circle cx="906" cy="184" r="1.1"></circle>
+    <circle cx="1042" cy="68" r="1.3"></circle>
+    <circle cx="1198" cy="152" r="1"></circle>
+    <circle cx="1346" cy="92" r="1.2"></circle>
+    <circle cx="196" cy="330" r="1"></circle>
+    <circle cx="560" cy="318" r="1"></circle>
+    <circle cx="1284" cy="352" r="1"></circle>
+  </g>
+
+  <!-- 地球：同步环中心的那颗星球 -->
+  <circle class="scene-fill--strong" cx="1010" cy="520" r="250" opacity="0.24"></circle>
+  <g class="scene-line">
+    <circle cx="1010" cy="520" r="250"></circle>
+    <path d="M1010 270c-80 78-80 422 0 500M1010 270c80 78 80 422 0 500"></path>
+    <path d="M760 520h500M804 410h412M804 630h412"></path>
+  </g>
+  <!-- 晨昏线：背光的一半压暗 -->
+  <path class="scene-fill" d="M1010 270a250 250 0 0 0 0 500z" opacity="0.14"></path>
+  <path class="scene-line" d="M1010 270a250 250 0 0 0 0 500" opacity="0.45"></path>
+
+  <!-- 轨道环：卫星就在这条虚线上环绕 -->
+  <ellipse
+    class="scene-track"
+    cx={orbit.cx}
+    cy={orbit.cy}
+    rx={orbit.rx}
+    ry={orbit.ry}
+    transform={`rotate(${orbit.tilt} ${orbit.cx} ${orbit.cy})`}></ellipse>
+
+  <!-- 运载器：沿椭圆轨道连续环绕（旋转带动 + 反向旋转保持姿态） -->
+  <g class="rocket-mover" data-mode="orbit">
+    <g class="orbit-anchor" style={orbitVars(orbit, track.scale)}>
+      <g class="orbit-squash">
+        <g class="orbit-spin">
+          <g class="orbit-slot">
+            <g class="orbit-unsquash">
+              <g class="orbit-counter">
+                <g class="orbit-craft">
+                  <Rocket stage={5} />
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

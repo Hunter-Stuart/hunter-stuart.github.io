@@ -1,0 +1,76 @@
+---
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<button class="art-toggle" type="button" aria-label={label} title={label} data-art-toggle>
+  <span class="art-toggle-label" aria-hidden="true">INK</span>
+  <svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15" fill="none">
+    <path
+      d="M5 19c0-3 1.4-4.6 3.2-6.4L17 4l3 3-8.6 8.8C9.6 17.6 8 19 5 19Z"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linejoin="round"
+    />
+    <path d="M14.2 6.2 17.8 9.8" stroke="currentColor" stroke-width="1.5" />
+  </svg>
+</button>
+
+<style>
+  .art-toggle {
+    display: inline-flex;
+    height: 2.25rem;
+    align-items: center;
+    gap: 0.35rem;
+    padding-inline: 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition:
+      border-color 140ms ease,
+      color 140ms ease;
+  }
+
+  .art-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .art-toggle-label {
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* 按钮显示的是"点下去会切到哪一画风" */
+  :global(:root[data-art='ink']) .art-toggle-label {
+    font-size: 0;
+  }
+
+  :global(:root[data-art='ink']) .art-toggle-label::after {
+    content: 'OIL';
+    font-size: 0.64rem;
+  }
+</style>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-art-toggle]');
+
+  // 只切画风，明暗由主题按钮单独控制
+  toggle?.addEventListener('click', () => {
+    const root = document.documentElement;
+    const next = root.dataset.art === 'ink' ? 'oil' : 'ink';
+    root.dataset.art = next;
+
+    try {
+      localStorage.setItem('orbit-art', next);
+    } catch {
+      // 存储失败时本次切换仍然生效。
+    }
+  });
+</script>

@@ -1,0 +1,17 @@
+---
+import ProfilePage from '../components/ProfilePage.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { identity, profileCopy } from '../i18n/content';
+import '../styles/reading.css';
+
+const locale = 'zh' as const;
+---
+
+<BaseLayout
+  locale={locale}
+  title={profileCopy[locale].title}
+  description={profileCopy[locale].summary}
+  alternatePath="/profile"
+>
+  <ProfilePage {locale} />
+</BaseLayout>

@@ -1,0 +1,11 @@
+---
+import WelcomePage from '../components/WelcomePage.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { identity } from '../i18n/content';
+
+const locale = 'zh' as const;
+---
+
+<BaseLayout locale={locale} title={identity[locale].title} standalone fullViewport alternatePath="/">
+  <WelcomePage {locale} />
+</BaseLayout>

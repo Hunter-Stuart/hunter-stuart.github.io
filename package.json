@@ -1,0 +1,25 @@
+{
+  "name": "hunter-stuart.github.io",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "npm run textures && astro build",
+    "textures": "node scripts/generate-textures.mjs",
+    "gallery": "node scripts/build-gallery.mjs",
+    "i18n:check": "node scripts/check-i18n.ts",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.4.4"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.5"
+  }
+}

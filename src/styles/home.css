@@ -1,0 +1,1718 @@
+/* ==========================================================================
+   六章轨道首页
+   每屏 100dvh，背景是内联 SVG 场景，前景是编目式内容列。
+   ========================================================================== */
+
+.orbit-home {
+  position: relative;
+}
+
+/* 整屏切换：六屏叠在一起，靠 --slot 上下滑动换页 */
+.orbit-home {
+  position: fixed;
+  inset: var(--header-height) 0 0;
+  overflow: hidden;
+  background: var(--page);
+}
+
+.orbit-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: clip;
+  isolation: isolate;
+  background: var(--page);
+  transform: translateY(calc(var(--slot, 0) * 100%));
+  will-change: transform;
+}
+
+/* 只有正在切换的那两屏才播过渡；其余屏直接归位，避免在视口边缘闪一下 */
+.orbit-panel.is-moving {
+  transition: transform 950ms cubic-bezier(0.62, 0.02, 0.34, 1);
+}
+
+.orbit-home.no-transition .orbit-panel,
+.orbit-home.no-transition .orbit-panel.is-moving {
+  transition: none;
+}
+
+.orbit-panel[inert] {
+  pointer-events: none;
+}
+
+/* 每章一个强调色，全部下游元素都继承 --scene-accent */
+.orbit-panel[data-chapter='launch-pad'] {
+  --scene-accent: var(--accent-launch-pad);
+}
+
+.orbit-panel[data-chapter='troposphere'] {
+  --scene-accent: var(--accent-troposphere);
+}
+
+.orbit-panel[data-chapter='karman-line'] {
+  --scene-accent: var(--accent-karman-line);
+}
+
+.orbit-panel[data-chapter='low-earth-orbit'] {
+  --scene-accent: var(--accent-low-earth-orbit);
+}
+
+.orbit-panel[data-chapter='geostationary'] {
+  --scene-accent: var(--accent-geostationary);
+}
+
+.orbit-panel[data-chapter='deep-space'] {
+  --scene-accent: var(--accent-deep-space);
+}
+
+.orbit-panel-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: min(calc(100% - 2 * var(--gutter)), 76rem);
+  flex-direction: column;
+  gap: clamp(1.75rem, 4vh, 3rem);
+  margin-inline: auto;
+  margin-block: auto;
+  padding-block: clamp(3rem, 8vh, 5.5rem) clamp(2rem, 5vh, 3.5rem);
+  /* 右侧让出轨道空域：文字列靠左，运载器在右上飞行 */
+  padding-right: min(32vw, 26rem);
+  /* 内容高于一屏时在本屏内部滚动，场景背景保持不动 */
+  max-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+@media (max-width: 64rem) {
+  .orbit-panel-inner {
+    padding-right: 0;
+  }
+}
+
+/* 手机底部有章节条，内容要留出高度 */
+@media (max-width: 72rem) {
+  .orbit-panel-inner {
+    padding-bottom: 4.75rem;
+  }
+}
+
+/* ---------- 背景场景 ---------- */
+
+.orbit-scene {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  color: var(--scene-accent);
+  pointer-events: none;
+}
+
+.orbit-scene svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.scene-star {
+  fill: currentColor;
+  animation: star-twinkle 7s ease-in-out infinite;
+  /* 水墨画风下星星整组隐去（--art-star-opacity: 0） */
+  opacity: var(--art-star-opacity, 1);
+}
+
+.scene-star:nth-child(3n) {
+  animation-delay: -2.4s;
+}
+
+.scene-star:nth-child(4n) {
+  animation-delay: -4.8s;
+}
+
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: calc(0.2 * var(--art-star-opacity, 1));
+  }
+
+  50% {
+    opacity: calc(0.7 * var(--art-star-opacity, 1));
+  }
+}
+
+.scene-route {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-dasharray: 7 9;
+  opacity: 0.55;
+  animation: route-drift 22s linear infinite;
+}
+
+@keyframes route-drift {
+  to {
+    stroke-dashoffset: -160;
+  }
+}
+
+.scene-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--art-scene-width, 1.2);
+  opacity: 0.32;
+}
+
+.scene-line--faint {
+  opacity: 0.16;
+}
+
+.scene-fill {
+  fill: currentColor;
+  opacity: 0.09;
+}
+
+.scene-fill--strong {
+  fill: currentColor;
+  opacity: 0.18;
+}
+
+.scene-glow {
+  fill: currentColor;
+  opacity: 0.4;
+}
+
+.scene-dot {
+  fill: currentColor;
+  opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-star,
+  .scene-route {
+    animation: none;
+  }
+}
+
+/* 离屏章节暂停动画：只让当前屏的场景在跑 */
+.orbit-panel:not(.is-visible) .scene-star,
+.orbit-panel:not(.is-visible) .scene-route {
+  animation-play-state: paused;
+}
+
+/* ---------- 章节编目标记 ---------- */
+
+.chapter-marker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 1.1rem;
+  color: var(--scene-accent);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.chapter-marker b {
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+  font-weight: 300;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  color: color-mix(in srgb, var(--scene-accent) 32%, transparent);
+}
+
+.chapter-marker span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.chapter-marker i {
+  font-style: normal;
+  opacity: 0.55;
+}
+
+/* ---------- 章节标题区 ---------- */
+
+.chapter-head {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 42rem;
+}
+
+.chapter-head h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 5vw, 3.6rem);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+
+.chapter-head p {
+  max-width: 38rem;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.chapter-head .tagline {
+  color: var(--scene-accent);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   01 发射台
+   ========================================================================== */
+
+.pad-stage {
+  display: grid;
+  gap: clamp(1.5rem, 3.5vh, 2.75rem);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 78rem) {
+  .pad-stage {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    align-items: end;
+    gap: 2.5rem;
+  }
+}
+
+.pad-copy {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.pad-copy h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.9rem, 8.5vw, 6rem);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+.pad-copy h1 em {
+  color: var(--scene-accent);
+  font-style: normal;
+}
+
+.pad-copy .intro {
+  max-width: 34rem;
+  color: var(--muted);
+  font-size: clamp(1rem, 1.4vw, 1.1rem);
+}
+
+.pad-local {
+  color: var(--muted);
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.pad-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.pad-motto {
+  margin: 0;
+  padding-left: 0.9rem;
+  border-left: 1px solid color-mix(in srgb, var(--scene-accent) 45%, transparent);
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-style: italic;
+}
+
+/* 精选日志 */
+.pad-featured {
+  display: grid;
+  gap: 0.5rem;
+  align-content: end;
+}
+
+.pad-featured-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.pad-featured-list a {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.62rem 0.15rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  text-decoration: none;
+  transition: padding-inline 160ms ease;
+}
+
+.pad-featured-list a:hover {
+  padding-inline: 0.35rem 0.15rem;
+}
+
+.pad-featured-list time {
+  flex: none;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+/* 封面底部的章节入口 */
+.pad-routes {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 1px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+@media (min-width: 48rem) {
+  .pad-routes {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.pad-routes a {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.9rem 0.75rem 0.9rem 0;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.pad-routes i {
+  display: inline-block;
+  width: 0.42rem;
+  height: 0.42rem;
+  border: 1px solid var(--route-accent, var(--scene-accent));
+  border-radius: 999px;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.pad-routes a:hover i {
+  background: var(--route-accent, var(--scene-accent));
+  transform: scale(1.35);
+}
+
+.pad-routes small {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+}
+
+.pad-routes strong {
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   02 技术栈
+   ========================================================================== */
+
+.stack-grid {
+  display: grid;
+  gap: 2rem clamp(1.5rem, 4vw, 3.5rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+}
+
+.stack-group {
+  display: grid;
+  gap: 0.9rem;
+  align-content: start;
+}
+
+.stack-group ul {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 1rem;
+  list-style: none;
+}
+
+.stack-item {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.stack-item-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.stack-item-top b {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.stack-item-top .mono {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.stack-track {
+  position: relative;
+  height: 2px;
+  background: color-mix(in srgb, var(--line) 85%, transparent);
+}
+
+.stack-track span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--level, 50%);
+  background: var(--scene-accent);
+}
+
+/* ==========================================================================
+   03 项目
+   ========================================================================== */
+
+.project-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.project-item {
+  display: grid;
+  gap: 0.5rem 2rem;
+  padding: 1.15rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+}
+
+@media (min-width: 68rem) {
+  .project-item {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+    align-items: baseline;
+  }
+}
+
+.project-item-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.project-item-head h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.project-status {
+  color: var(--scene-accent);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+}
+
+.project-body {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.project-body p {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.project-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.project-progress .stack-track {
+  flex: 1;
+  max-width: 11rem;
+}
+
+/* ==========================================================================
+   04 近地轨道：日志列表
+   ========================================================================== */
+
+.post-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.post-list li {
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+}
+
+.post-row {
+  display: grid;
+  gap: 0.3rem 1.5rem;
+  padding: 0.95rem 0;
+  color: var(--text);
+  text-decoration: none;
+  transition: padding-inline 160ms ease;
+}
+
+@media (min-width: 46rem) {
+  .post-row {
+    grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+    align-items: baseline;
+  }
+}
+
+.post-row:hover {
+  padding-inline: 0.4rem 0;
+}
+
+.post-row time {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+.post-row strong {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.post-row span {
+  color: var(--scene-accent);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.post-row p {
+  grid-column: 2 / -1;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+/* ==========================================================================
+   05 同步轨道：日常
+   ========================================================================== */
+
+.life-grid {
+  display: grid;
+  gap: 1.5rem clamp(1.5rem, 4vw, 3rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+}
+
+.life-card {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.1rem 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 62%, transparent);
+  align-content: start;
+}
+
+.life-card time {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+}
+
+.life-card h4 {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.life-card p {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+/* ---------- 相册：横向滚动条 ---------- */
+
+.gallery {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.gallery-strip {
+  display: flex;
+  margin: 0;
+  padding: 0 0 0.4rem;
+  gap: 0.9rem;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+}
+
+.gallery-strip li {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+.gallery-strip figure {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  width: clamp(8.5rem, 15vw, 12rem);
+}
+
+.gallery-strip img {
+  width: 100%;
+  height: clamp(11rem, 20vh, 15rem);
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+}
+
+.gallery-strip figcaption {
+  display: grid;
+  gap: 0.15rem;
+  font-size: 0.78rem;
+}
+
+.gallery-strip figcaption b {
+  color: var(--scene-accent);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.gallery-strip figcaption span {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.life-quote {
+  margin: 0;
+  padding: 1.2rem 1.3rem;
+  border-left: 2px solid var(--scene-accent);
+  background: color-mix(in srgb, var(--scene-accent) 7%, transparent);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-style: italic;
+}
+
+/* ==========================================================================
+   06 深空：友链与联系
+   ========================================================================== */
+
+.deep-grid {
+  display: grid;
+  gap: 2rem clamp(1.5rem, 4vw, 3.5rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  align-items: start;
+}
+
+.friend-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+  /* 友链多了就在这块区域里滚，整页仍然保持一屏 */
+  max-height: clamp(7rem, 24vh, 13rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  /* 上下边缘淡出，暗示这里可以滚 */
+  mask-image: linear-gradient(to bottom, transparent 0, #000 0.6rem, #000 calc(100% - 0.9rem), transparent 100%);
+}
+
+.friend-list:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.friend-list li {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+.friend-list a {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.45rem;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.friend-list em {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.friend-list small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.contact-block {
+  display: grid;
+  gap: 0.8rem;
+  justify-items: start;
+}
+
+.contact-emails--loose {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 0.32rem;
+  list-style: none;
+  font-size: 0.86rem;
+}
+
+.contact-emails--loose li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.contact-emails--loose .mono {
+  min-width: 2.4rem;
+  color: var(--muted);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.contact-emails--loose a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--scene-accent) 45%, transparent);
+}
+
+.contact-emails--loose a:hover {
+  color: var(--scene-accent);
+}
+
+.contact-block a.mail {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--scene-accent) 50%, transparent);
+}
+
+.finale {
+  display: grid;
+  gap: 0.6rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   章节页脚：去下一站
+   ========================================================================== */
+
+.panel-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.panel-foot a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.panel-foot a:hover {
+  color: var(--scene-accent);
+}
+
+.panel-foot-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+/* ==========================================================================
+   右侧对数高度轴（桌面）
+   ========================================================================== */
+
+.orbit-axis {
+  position: fixed;
+  z-index: 30;
+  inset: 50% 1.5rem auto auto;
+  transform: translateY(-50%);
+  display: grid;
+  align-items: center;
+  gap: 0;
+}
+
+.orbit-axis ol {
+  position: relative;
+  display: grid;
+  /* li 都是绝对定位，不参与尺寸计算，必须显式给宽度，
+     否则整条轴会塌陷成 0 宽、标签全部堆在同一个点上 */
+  width: 13.5rem;
+  height: min(62vh, 30rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.orbit-axis ol::before {
+  content: '';
+  position: absolute;
+  inset: 0 0.28rem 0 auto;
+  width: 1px;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--line) 60%, transparent),
+    color-mix(in srgb, var(--accent) 45%, transparent)
+  );
+}
+
+/* 沿高度轴逐步上升的小火箭 */
+.axis-craft {
+  position: absolute;
+  z-index: 2;
+  right: 0.28rem;
+  bottom: var(--craft-offset, 0%);
+  width: 1rem;
+  color: var(--craft-accent, var(--accent));
+  transform: translate(50%, 50%);
+  transition:
+    bottom 780ms cubic-bezier(0.3, 0, 0.2, 1),
+    color 420ms ease;
+  pointer-events: none;
+}
+
+.axis-craft svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .axis-craft {
+    transition: none;
+  }
+}
+
+.orbit-axis li {
+  position: absolute;
+  z-index: 1;
+  right: 0;
+  bottom: var(--offset, 0%);
+  left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  transform: translateY(50%);
+}
+
+.orbit-axis a {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  /* 圆点贴着轴，文字朝左伸出去，不会超出视口右边界 */
+  flex-direction: row-reverse;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.orbit-axis a::before {
+  content: '';
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-left: 0.08rem;
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  background: var(--page);
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+/* 章节标识常显在轴的左侧，与小火箭分居两侧 */
+.orbit-axis a span {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding-right: 1.6rem;
+  text-align: right;
+  white-space: nowrap;
+  transition: color 160ms ease;
+}
+
+/* 从标签引一条细线回到节点，强化索引关系 */
+.orbit-axis a span::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 0.28rem;
+  width: 0.72rem;
+  height: 1px;
+  background: currentcolor;
+  opacity: 0.28;
+}
+
+.orbit-axis a span b {
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+
+.orbit-axis a span em {
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  opacity: 0.72;
+}
+
+
+.orbit-axis a:hover span em,
+.orbit-axis li.is-active a span em {
+  opacity: 1;
+}
+
+.orbit-axis a:hover::before,
+.orbit-axis li.is-active a::before {
+  opacity: 1;
+  transform: none;
+}
+
+.orbit-axis li.is-active a {
+  color: var(--active-accent, var(--accent));
+}
+
+.orbit-axis li.is-active a::before {
+  background: currentcolor;
+}
+
+@media (max-width: 72rem) {
+  .orbit-axis {
+    display: none;
+  }
+}
+
+/* ---------- 手机端：底部紧凑章节条 ---------- */
+
+.orbit-dock {
+  position: fixed;
+  z-index: 35;
+  inset: auto 0 0;
+  display: none;
+  gap: 2px;
+  padding: 0.5rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--page) 92%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.orbit-dock a {
+  display: grid;
+  flex: 1;
+  gap: 0.2rem;
+  justify-items: center;
+  padding: 0.35rem 0.1rem;
+  color: var(--muted);
+  font-size: 0.62rem;
+  text-decoration: none;
+  text-align: center;
+}
+
+.orbit-dock a b {
+  color: var(--dock-accent, currentcolor);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+.orbit-dock a[aria-current='true'] {
+  color: var(--text);
+}
+
+.orbit-dock a[aria-current='true'] b {
+  color: var(--dock-accent);
+}
+
+@media (max-width: 72rem) {
+  .orbit-dock {
+    display: flex;
+  }
+
+  .orbit-home {
+    padding-bottom: 3.55rem;
+  }
+}
+
+/* ==========================================================================
+   绘画质感：肌理层 · 轨道 · 沿轨道运动的运载器
+   ========================================================================== */
+
+/* 肌理铺在场景之上、内容之下：油画画布颗粒 / 宣纸纤维 */
+.orbit-panel::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background-image: var(--art-texture);
+  background-size: 340px 340px;
+  background-repeat: repeat;
+  opacity: var(--art-texture-opacity);
+  mix-blend-mode: var(--art-blend);
+  pointer-events: none;
+}
+
+/* ---------- 轨道：每章一条可见的虚线轨迹 ---------- */
+
+.scene-track {
+  fill: none;
+  stroke: var(--scene-accent);
+  stroke-width: var(--art-track-width, 1.8);
+  stroke-linecap: round;
+  stroke-dasharray: 10 14;
+  opacity: 0.7;
+  animation: track-flow 30s linear infinite;
+}
+
+@keyframes track-flow {
+  to {
+    stroke-dashoffset: -240;
+  }
+}
+
+/* 水墨画风：轨道改用墨色，更像一笔拖出来的线 */
+:root[data-art='ink'] .scene-track {
+  stroke: var(--text);
+  opacity: 0.4;
+  stroke-dasharray: 16 20;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-track {
+    animation: none;
+  }
+}
+
+/* ---------- 运载器：三种运动模式 ---------- */
+
+.rocket-mover {
+  color: var(--scene-accent);
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+/* ① static：第 1 屏。先贴地静止 0.7s，随后自动点火升空并悬停 */
+.rocket-mover[data-mode='static'] {
+  transform: translate(var(--dock-x), var(--dock-y)) scale(var(--scale))
+    translate(-120px, -280px);
+  animation: rocket-liftoff 2000ms cubic-bezier(0.2, 0.62, 0.28, 1) 700ms both;
+}
+
+@keyframes rocket-liftoff {
+  0% {
+    transform: translate(var(--dock-x), var(--dock-y)) scale(var(--scale))
+      translate(-120px, -280px);
+  }
+
+  100% {
+    transform: translate(var(--dock-x), calc(var(--dock-y) - 170px)) scale(var(--scale))
+      translate(-120px, -280px);
+  }
+}
+
+/* 点火瞬间尾焰起来，升空后回落到悬停状态 */
+.orbit-panel[data-chapter='launch-pad'] .rocket-flame {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+  animation: flame-liftoff 2000ms ease-out 700ms both;
+}
+
+@keyframes flame-liftoff {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+
+  16% {
+    transform: scaleY(2.4);
+    opacity: 1;
+  }
+
+  62% {
+    transform: scaleY(1.35);
+    opacity: 0.85;
+  }
+
+  100% {
+    transform: scaleY(0.72);
+    opacity: 0.45;
+  }
+}
+
+.orbit-panel[data-chapter='launch-pad'] .rocket-airflow {
+  opacity: 0;
+}
+
+/* ② climb：沿上升轨道单向划过（关键帧由 data/tracks.ts 采样生成） */
+.rocket-mover[data-mode='climb'] {
+  transform: scale(var(--scale)) translate(-120px, -280px);
+}
+
+.rocket-climb {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: climb-troposphere 13s linear infinite;
+}
+
+/* ③ arc：沿椭圆轨道的一段弧划过（关键帧由 data/tracks.ts 采样生成） */
+.rocket-mover[data-mode='arc'] {
+  transform: scale(var(--scale)) translate(-120px, -280px);
+}
+
+.rocket-arc {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.orbit-panel[data-chapter='karman-line'] .rocket-arc {
+  animation: arc-karman-line 26s linear infinite;
+}
+
+.orbit-panel[data-chapter='low-earth-orbit'] .rocket-arc {
+  animation: arc-low-earth-orbit 22s linear infinite;
+}
+
+/* ④ orbit：绕完整天体连续环绕 —— 旋转带动，反向旋转抵消姿态 */
+.rocket-mover[data-mode='orbit'] {
+  transform: none;
+}
+
+.orbit-anchor,
+.orbit-squash,
+.orbit-spin,
+.orbit-slot,
+.orbit-unsquash,
+.orbit-counter,
+.orbit-craft {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.orbit-anchor {
+  transform: translate(var(--orbit-cx), var(--orbit-cy)) rotate(var(--orbit-tilt));
+}
+
+/* 先把圆压成椭圆 */
+.orbit-squash {
+  transform: scale(1, var(--orbit-squash));
+}
+
+/* 绕椭圆中心连续旋转，永不停止 */
+.orbit-spin {
+  animation: orbit-spin var(--orbit-period) linear infinite;
+  animation-delay: calc(var(--orbit-period) * var(--orbit-phase) * -1);
+}
+
+/* 把卫星推到轨道半径上 */
+.orbit-slot {
+  transform: translate(var(--orbit-rx), 0);
+}
+
+/* 抵消压扁，卫星本身不变形 */
+.orbit-unsquash {
+  transform: scale(1, var(--orbit-unsquash));
+}
+
+/* 抵消旋转，卫星姿态保持朝上 */
+.orbit-counter {
+  animation: orbit-spin var(--orbit-period) linear infinite reverse;
+  animation-delay: calc(var(--orbit-period) * var(--orbit-phase) * -1);
+}
+
+.orbit-craft {
+  transform: scale(var(--scale)) translate(-120px, -280px);
+}
+
+@keyframes orbit-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- 离场：点火，沿轨道笔直上升 ---------- */
+
+.orbit-panel.is-departing .rocket-mover[data-mode='static'] {
+  animation: rocket-ascend 760ms cubic-bezier(0.42, 0.05, 0.72, 1) forwards;
+}
+
+/* 起点是升空后的悬停位置（dock-y - 170），不是地面 */
+@keyframes rocket-ascend {
+  0% {
+    transform: translate(var(--dock-x), calc(var(--dock-y) - 170px)) scale(var(--scale))
+      translate(-120px, -280px);
+    opacity: 1;
+  }
+
+  12% {
+    transform: translate(var(--dock-x), calc(var(--dock-y) - 154px)) scale(var(--scale))
+      translate(-120px, -280px);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(var(--dock-x), calc(var(--dock-y) - 660px))
+      scale(calc(var(--scale) * 0.78)) translate(-120px, -280px);
+    opacity: 0;
+  }
+}
+
+.orbit-panel.is-departing .rocket-mover[data-mode='climb'],
+.orbit-panel.is-departing .rocket-mover[data-mode='orbit'] {
+  animation: rocket-exit 760ms ease-in forwards;
+}
+
+@keyframes rocket-exit {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-110px);
+    opacity: 0;
+  }
+}
+
+/* 点火瞬间尾焰暴涨 */
+.orbit-panel.is-departing .rocket-flame {
+  animation: flame-burst 760ms ease-out;
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+}
+
+@keyframes flame-burst {
+  0% {
+    transform: scaleY(0.35);
+    opacity: 0.3;
+  }
+
+  28% {
+    transform: scaleY(2.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scaleY(1.6);
+    opacity: 0.55;
+  }
+}
+
+/* 2 → 3 翻页：两枚助推器脱落 */
+.orbit-panel[data-chapter='troposphere'].is-departing .rocket-booster--left {
+  animation: booster-left 760ms ease-in forwards;
+}
+
+.orbit-panel[data-chapter='troposphere'].is-departing .rocket-booster--right {
+  animation: booster-right 760ms ease-in forwards;
+}
+
+/* 位移写在缩放后的坐标系里，所以要放大来抵消 scale */
+@keyframes booster-left {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+
+  40% {
+    transform: translate(-70px, 320px) rotate(-12deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-260px, 760px) rotate(-28deg);
+    opacity: 0;
+  }
+}
+
+@keyframes booster-right {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+
+  40% {
+    transform: translate(70px, 320px) rotate(12deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(260px, 760px) rotate(28deg);
+    opacity: 0;
+  }
+}
+
+/* ---------- 入场 ---------- */
+
+/* 第 2 屏开头：点火，从画面下方冲入并悬停（翻页后能真正看到的那次发射） */
+.orbit-panel.is-arriving .rocket-mover[data-mode='climb'] {
+  animation: rocket-launch-in 1400ms cubic-bezier(0.16, 0.72, 0.28, 1) both;
+}
+
+@keyframes rocket-launch-in {
+  0% {
+    transform: translate(0, 420px) scale(var(--scale)) translate(-120px, -280px);
+    opacity: 0;
+  }
+
+  18% {
+    opacity: 1;
+  }
+
+  72% {
+    transform: translate(0, -18px) scale(var(--scale)) translate(-120px, -280px);
+  }
+
+  100% {
+    transform: translate(0, 0) scale(var(--scale)) translate(-120px, -280px);
+    opacity: 1;
+  }
+}
+
+/* 冲入时尾焰暴涨 */
+.orbit-panel.is-arriving .rocket-mover[data-mode='climb'] .rocket-flame {
+  animation: flame-burst 1400ms ease-out both;
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+}
+
+/* 在轨章节入场：从轨道外淡入 */
+.orbit-panel.is-arriving .rocket-mover[data-mode='orbit'] {
+  animation: rocket-enter 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes rocket-enter {
+  0% {
+    transform: translateY(130px);
+    opacity: 0;
+  }
+
+  35% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.rocket-part {
+  fill: color-mix(in srgb, currentColor 8%, transparent);
+  stroke: currentColor;
+  stroke-width: var(--rocket-stroke, 3);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.rocket-detail {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: calc(var(--rocket-stroke, 3) * 0.72);
+  stroke-linecap: round;
+  opacity: 0.6;
+}
+
+.rocket-node {
+  fill: currentColor;
+  opacity: 0.8;
+}
+
+.rocket-wing {
+  fill: color-mix(in srgb, currentColor 16%, transparent);
+}
+
+/* 尾焰：三层，越往里越亮 */
+.rocket-flame path {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+}
+
+.rocket-flame-outer {
+  fill: color-mix(in srgb, currentColor 14%, transparent);
+  stroke: currentColor;
+  stroke-width: calc(var(--rocket-stroke, 3) * 0.7);
+  opacity: 0.6;
+}
+
+.rocket-flame-inner {
+  fill: color-mix(in srgb, currentColor 30%, transparent);
+  stroke: none;
+  animation: flame-flicker 1.4s ease-in-out infinite alternate;
+}
+
+.rocket-flame-core {
+  fill: color-mix(in srgb, var(--accent-deep-space) 75%, transparent);
+  stroke: none;
+  animation: flame-flicker 0.9s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes flame-flicker {
+  from {
+    transform: scaleY(0.9);
+    opacity: 0.72;
+  }
+
+  to {
+    transform: scaleY(1.12);
+    opacity: 1;
+  }
+}
+
+/* 发射瞬间被推开的气流 */
+.rocket-airflow path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: calc(var(--rocket-stroke, 3) * 0.62);
+  stroke-dasharray: 10 14;
+  opacity: 0.42;
+  animation: airflow-drift 3.4s linear infinite;
+}
+
+@keyframes airflow-drift {
+  to {
+    stroke-dashoffset: -96;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rocket-flame-inner,
+  .rocket-flame-core,
+  .rocket-airflow path,
+  .orbit-panel.is-arriving .rocket-mover {
+    animation: none;
+  }
+}
+
+/* 手机端：轨道与运载器整体退到背景，不与文字抢 */
+@media (max-width: 56rem) {
+  /* 竖屏会把场景两侧裁掉，整体左移让轨道进入视野 */
+  .orbit-scene svg {
+    transform: translateX(-14%);
+  }
+
+  .scene-track {
+    opacity: 0.38;
+  }
+
+  /* 手机端：只保留环绕与滑行，不做翻页进出场，避免章节高度抖动 */
+  .rocket-mover {
+    opacity: 0.78;
+  }
+
+  .orbit-panel.is-arriving .rocket-mover,
+  .orbit-panel.is-departing .rocket-mover,
+  .orbit-panel.is-departing .rocket-flame,
+  .orbit-panel.is-departing .rocket-booster--left,
+  .orbit-panel.is-departing .rocket-booster--right {
+    animation: none;
+  }
+}
+/* ==========================================================================
+   响应式收尾
+   ========================================================================== */
+
+@media (max-width: 46rem) {
+  .chapter-marker b {
+    font-size: 2rem;
+  }
+
+  .pad-featured-list a {
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .panel-foot {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ==========================================================================
+   英文版排版收紧
+   英文文案比中文长约 30%，同一套间距下第 1/2/3/5 屏会溢出，
+   这里把间距、字号、行内留白统一压一档，保证仍然一屏一页。
+   ========================================================================== */
+
+/* 英文行更长，右侧轨道空域收窄一点：内容列从 ~756px 回到 ~840px，
+   技术栈才能三列并排、项目描述少换一行 */
+:root[lang='en'] .orbit-panel-inner {
+  gap: clamp(1rem, 2.2vh, 1.8rem);
+  padding-block: clamp(4.5rem, 9vh, 6.5rem) clamp(2rem, 4.5vh, 3rem);
+  padding-right: min(26vw, 19rem);
+}
+
+:root[lang='en'] .chapter-head {
+  gap: 0.55rem;
+}
+
+:root[lang='en'] .chapter-head h2 {
+  font-size: clamp(1.9rem, 4.4vw, 3.1rem);
+}
+
+:root[lang='en'] .chapter-head p {
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+:root[lang='en'] .pad-copy h1 {
+  font-size: clamp(2.3rem, 6.6vw, 4.4rem);
+}
+
+:root[lang='en'] .pad-copy .intro {
+  font-size: 0.96rem;
+  line-height: 1.55;
+}
+
+:root[lang='en'] .pad-featured-list a {
+  padding-block: 0.5rem;
+}
+
+:root[lang='en'] .pad-routes a {
+  padding-block: 0.7rem;
+}
+
+:root[lang='en'] .stack-group ul {
+  gap: 0.72rem;
+}
+
+:root[lang='en'] .stack-item-top b {
+  font-size: 0.9rem;
+}
+
+:root[lang='en'] .project-item {
+  padding-block: 0.85rem;
+}
+
+:root[lang='en'] .project-body {
+  gap: 0.4rem;
+}
+
+:root[lang='en'] .project-body p {
+  font-size: 0.87rem;
+  line-height: 1.5;
+}
+
+:root[lang='en'] .project-item-head h4 {
+  font-size: 1rem;
+}
+
+:root[lang='en'] .life-card {
+  padding: 0.9rem 1rem;
+}
+
+:root[lang='en'] .life-card h4 {
+  font-size: 0.93rem;
+  line-height: 1.4;
+}
+
+:root[lang='en'] .life-quote {
+  padding: 0.85rem 1.05rem;
+  font-size: 0.97rem;
+  line-height: 1.5;
+}
+
+:root[lang='en'] .post-row {
+  padding-block: 0.75rem;
+}
+
+:root[lang='en'] .panel-foot {
+  padding-top: 1rem;
+}
+/* 英文长句兜底：超出就截断，保证每屏高度可控 */
+:root[lang='en'] .chapter-head p {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+:root[lang='en'] .project-body p {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+:root[lang='en'] .life-card h4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+:root[lang='en'] .post-row p {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 封面章节入口：英文名更长，改成 3 列两行 */
+:root[lang='en'] .pad-routes {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+:root[lang='en'] .pad-routes strong {
+  font-size: 0.86rem;
+}
+
+:root[lang='en'] .pad-routes small {
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+}

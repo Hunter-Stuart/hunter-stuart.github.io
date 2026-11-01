@@ -1,0 +1,101 @@
+---
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { htmlLanguage, localizedPath, otherLocale, type Locale } from '../i18n/config';
+import { identity } from '../i18n/content';
+import { getUi } from '../i18n/ui';
+import '../styles/global.css';
+
+interface Props {
+  locale: Locale;
+  title?: string;
+  description?: string;
+  /** 当前页面在另一种语言里的对应路径，用于语言切换与 hreflang */
+  alternatePath?: string;
+  noindex?: boolean;
+  fullViewport?: boolean;
+  /** 欢迎页这类单屏页不显示页脚 */
+  standalone?: boolean;
+}
+
+const {
+  locale,
+  title = identity[locale].title,
+  description = identity[locale].description,
+  alternatePath,
+  noindex = false,
+  fullViewport = false,
+  standalone = false,
+} = Astro.props;
+
+const site = identity[locale];
+const ui = getUi(locale);
+const pageTitle = title === site.title ? title : `${title} — ${site.name}`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
+const other = otherLocale(locale);
+const strippedPath = Astro.url.pathname.replace(/^\/en/, '') || '/';
+const otherHref = localizedPath(other, alternatePath ?? strippedPath);
+---
+
+<!doctype html>
+<html lang={htmlLanguage[locale]} data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#05070d" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={htmlLanguage[locale].replace('-', '_')} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" hreflang={htmlLanguage[locale]} href={canonical} />
+    <link rel="alternate" hreflang={htmlLanguage[other]} href={new URL(otherHref, Astro.site ?? Astro.url.origin)} />
+    <link rel="alternate" hreflang="x-default" href={new URL(localizedPath('zh', alternatePath ?? '/'), Astro.site ?? Astro.url.origin)} />
+    <title>{pageTitle}</title>
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+
+        // 明暗与画风各自独立存储，互不影响
+        let theme = 'dark';
+        try {
+          const stored = localStorage.getItem('orbit-theme');
+          if (stored === 'light' || stored === 'dark') {
+            theme = stored;
+          } else if (matchMedia('(prefers-color-scheme: light)').matches) {
+            theme = 'light';
+          }
+        } catch {
+          // 存储不可用时沿用深色。
+        }
+
+        let art = 'oil';
+        try {
+          const storedArt = localStorage.getItem('orbit-art');
+          if (storedArt === 'oil' || storedArt === 'ink') art = storedArt;
+        } catch {
+          // 同上。
+        }
+
+        root.dataset.art = art;
+        root.dataset.theme = theme;
+        root.style.colorScheme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">{ui.skipToContent}</a>
+    {!standalone && <SiteHeader {locale} {otherHref} />}
+    <slot />
+    {!fullViewport && !standalone && <SiteFooter {locale} />}
+  </body>
+</html>

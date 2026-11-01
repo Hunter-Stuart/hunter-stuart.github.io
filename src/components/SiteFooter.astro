@@ -1,0 +1,44 @@
+---
+import { localizedPath, type Locale } from '../i18n/config';
+import { identity } from '../i18n/content';
+import { getUi } from '../i18n/ui';
+import { socialLinks } from '../data/catalog';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const ui = getUi(locale);
+const site = identity[locale];
+const year = new Date().getFullYear();
+
+const items = [
+  { label: ui.nav.home, href: localizedPath(locale, '/') },
+  { label: ui.nav.blog, href: localizedPath(locale, '/blog') },
+  { label: ui.nav.profile, href: localizedPath(locale, '/profile') },
+  { label: ui.nav.posts, href: localizedPath(locale, '/posts') },
+  { label: ui.nav.friends, href: localizedPath(locale, '/friends') },
+];
+---
+
+<footer class="site-footer">
+  <div class="site-footer-inner shell">
+    <div>
+      <strong>{site.name}</strong>
+      <p>{site.localName} · {site.kicker}</p>
+      <p class="mono">{site.location}</p>
+      <p class="mono">© {year} · {ui.rights}</p>
+    </div>
+    <nav aria-label={ui.navLabel}>
+      {items.map((item) => <a href={item.href}>{item.label}</a>)}
+    </nav>
+    <div>
+      <strong>{ui.contact}</strong>
+      <p><a href={`mailto:${site.email}`}>{site.email}</a></p>
+      {socialLinks.map((link) => (
+        <p><a href={link.href} rel="me noopener" target="_blank">{link.label}</a></p>
+      ))}
+    </div>
+  </div>
+</footer>

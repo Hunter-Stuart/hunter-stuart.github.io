@@ -1,0 +1,72 @@
+---
+import ChapterMarker from '../orbit/ChapterMarker.astro';
+import TroposphereScene from '../orbit/scenes/TroposphereScene.astro';
+import { chapters } from '../../data/orbit';
+import { getCatalog } from '../../data/catalog';
+import { localizedPath, type Locale } from '../../i18n/config';
+import { homeCopy } from '../../i18n/content';
+import { getUi } from '../../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const chapter = chapters[1];
+const copy = homeCopy[locale].chapters[chapter.id];
+const ui = getUi(locale);
+const { skills } = getCatalog(locale);
+const next = chapters[2];
+const nextCopy = homeCopy[locale].chapters[next.id];
+---
+
+<section
+  class="orbit-panel"
+  id={chapter.id}
+  data-chapter={chapter.id}
+  style="--slot:-1"
+  aria-labelledby="troposphere-title"
+>
+  <div class="orbit-scene"><TroposphereScene /></div>
+
+  <div class="orbit-panel-inner">
+    <ChapterMarker index={chapter.index} altitude={chapter.altitude} codename={copy.codename} />
+
+    <div class="chapter-head">
+      <p class="tagline" data-reveal>{copy.tagline}</p>
+      <h2 id="troposphere-title" tabindex="-1" data-reveal>{copy.heading}</h2>
+      <p data-reveal>{copy.description}</p>
+    </div>
+
+    <div class="stack-grid">
+      {skills.map((group) => (
+        <div class="stack-group" data-reveal>
+          <div class="section-heading">
+            <h3>{group.group}</h3>
+            <span>{String(group.items.length).padStart(2, '0')}</span>
+          </div>
+          <ul>
+            {group.items.map((item) => (
+              <li class="stack-item">
+                <div class="stack-item-top">
+                  <b>{item.name}</b>
+                  <span class="mono">{item.level}%</span>
+                </div>
+                <div class="stack-track">
+                  <span style={`--level:${item.level}%`} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    <div class="panel-foot">
+      <span>{copy.foot}</span>
+      <a href={`${localizedPath(locale, '/blog')}#${next.id}`}>
+        {ui.nextStation} · {nextCopy.name} <span aria-hidden="true">↓</span>
+      </a>
+    </div>
+  </div>
+</section>

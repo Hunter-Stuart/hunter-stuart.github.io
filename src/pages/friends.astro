@@ -1,0 +1,18 @@
+---
+import FriendsPage from '../components/FriendsPage.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getUi } from '../i18n/ui';
+import '../styles/reading.css';
+
+const locale = 'zh' as const;
+const ui = getUi(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={ui.friendsTitle}
+  description={ui.friendsIntro}
+  alternatePath="/friends"
+>
+  <FriendsPage {locale} />
+</BaseLayout>

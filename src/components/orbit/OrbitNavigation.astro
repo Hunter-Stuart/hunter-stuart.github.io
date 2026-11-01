@@ -1,0 +1,67 @@
+---
+import { altitudePercent, chapters } from '../../data/orbit';
+import { localizedPath, type Locale } from '../../i18n/config';
+import { homeCopy } from '../../i18n/content';
+import { getUi } from '../../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const copy = homeCopy[locale];
+const ui = getUi(locale);
+const blogPath = localizedPath(locale, '/blog');
+---
+
+<nav class="orbit-axis" aria-label={ui.axisLabel} data-orbit-axis>
+  <ol>
+    {chapters.map((chapter) => (
+      <li
+        style={`--offset:${altitudePercent(chapter.altitudeKm)}; --active-accent: var(--accent-${chapter.id})`}
+        data-orbit-item={chapter.id}
+        data-offset={altitudePercent(chapter.altitudeKm)}
+      >
+        <a href={`${blogPath}#${chapter.id}`} data-orbit-link={chapter.id}>
+          <span class="axis-label">
+            <b>{chapter.altitude}</b>
+            <em>{copy.chapters[chapter.id].name}</em>
+          </span>
+        </a>
+      </li>
+    ))}
+
+    <!-- 沿着高度轴逐步上升的小火箭：标出当前所在位置 -->
+    <span class="axis-craft" aria-hidden="true" data-axis-craft>
+      <svg viewBox="0 0 20 38">
+        <!-- 尾焰 -->
+        <path
+          d="M10 28c1.7 2.4 1.7 5.6 0 8-1.7-2.4-1.7-5.6 0-8Z"
+          fill="currentColor"
+          opacity="0.5"></path>
+        <!-- 尾翼 -->
+        <path d="M5 19.5 1.4 25.6v5.4L5 28V19.5Z" fill="currentColor" opacity="0.85"></path>
+        <path d="M15 19.5l3.6 6.1v5.4L15 28V19.5Z" fill="currentColor" opacity="0.85"></path>
+        <!-- 主体：实心 -->
+        <path
+          d="M10 1.4c3.5 5 5.2 10.4 5.2 15.8V28.6H4.8V17.2C4.8 11.8 6.5 6.4 10 1.4Z"
+          fill="currentColor"></path>
+        <!-- 舷窗 -->
+        <circle cx="10" cy="11.6" r="2.2" fill="var(--page)"></circle>
+      </svg>
+    </span>
+  </ol>
+</nav>
+
+<nav class="orbit-dock" aria-label={ui.dockLabel} data-orbit-dock>
+  {chapters.map((chapter) => (
+    <a
+      href={`${blogPath}#${chapter.id}`}
+      style={`--dock-accent: var(--accent-${chapter.id})`}
+      data-orbit-link={chapter.id}
+    >
+      <b>{chapter.index}</b>
+      {copy.chapters[chapter.id].name}
+    </a>
+  ))}
+</nav>

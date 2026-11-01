@@ -1,0 +1,98 @@
+---
+import ChapterMarker from '../orbit/ChapterMarker.astro';
+import DeepSpaceScene from '../orbit/scenes/DeepSpaceScene.astro';
+import { chapters } from '../../data/orbit';
+import { getCatalog, socialLinks } from '../../data/catalog';
+import { localizedPath, type Locale } from '../../i18n/config';
+import { homeCopy, identity } from '../../i18n/content';
+import { getUi } from '../../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const chapter = chapters[5];
+const copy = homeCopy[locale].chapters[chapter.id];
+const home = homeCopy[locale];
+const site = identity[locale];
+const ui = getUi(locale);
+const { friends } = getCatalog(locale);
+const year = new Date().getFullYear();
+---
+
+<section
+  class="orbit-panel"
+  id={chapter.id}
+  data-chapter={chapter.id}
+  style="--slot:-5"
+  aria-labelledby="deep-space-title"
+>
+  <div class="orbit-scene"><DeepSpaceScene /></div>
+
+  <div class="orbit-panel-inner">
+    <ChapterMarker index={chapter.index} altitude={chapter.altitude} codename={copy.codename} />
+
+    <div class="chapter-head">
+      <p class="tagline" data-reveal>{copy.tagline}</p>
+      <h2 id="deep-space-title" tabindex="-1" data-reveal>{copy.heading}</h2>
+      <p data-reveal>{copy.description}</p>
+    </div>
+
+    <div class="deep-grid">
+      <div class="stack-group" data-reveal>
+        <div class="section-heading">
+          <h3>{home.linksTitle}</h3>
+          <span>{home.linksTag}</span>
+        </div>
+        <ul class="friend-list" tabindex="0" aria-label={home.linksTitle}>
+          {friends.map((friend) => (
+            <li>
+              <a href={friend.href} rel="noopener" target="_blank">
+                {friend.name}
+                {friend.realName && <em>{friend.realName}</em>}
+              </a>
+              <small>{friend.note}</small>
+            </li>
+          ))}
+        </ul>
+        <a class="button" href={localizedPath(locale, '/friends')}>
+          {ui.friendsAll}
+          <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+
+      <div class="contact-block" data-reveal>
+        <div class="section-heading">
+          <h3>{home.contactTitle}</h3>
+          <span>{home.contactTag}</span>
+        </div>
+        <ul class="contact-emails contact-emails--loose">
+          <li>
+            <span class="mono">{ui.emailPrimary}</span>
+            <a href={`mailto:${site.email}`}>{site.email}</a>
+          </li>
+          {site.altEmails.map((item) => (
+            <li>
+              <span class="mono">{item.label}</span>
+              <a href={`mailto:${item.address}`}>{item.address}</a>
+            </li>
+          ))}
+        </ul>
+        <p class="mono">{site.location}</p>
+        <p style="color:var(--muted);font-size:0.9rem">{home.contactNote}</p>
+        <div class="pad-actions">
+          {socialLinks.map((link) => (
+            <a class="button" href={link.href} rel="me noopener" target="_blank">{link.label}</a>
+          ))}
+          <a class="button" href={localizedPath(locale, '/profile')}>{ui.nav.profile}</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="finale" data-reveal>
+      <p>© {year} {site.name} · {site.localName}</p>
+      <p class="mono">{site.location}</p>
+    </div>
+  </div>
+</section>

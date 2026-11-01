@@ -1,0 +1,68 @@
+---
+import ChapterMarker from '../orbit/ChapterMarker.astro';
+import LowEarthOrbitScene from '../orbit/scenes/LowEarthOrbitScene.astro';
+import { chapters } from '../../data/orbit';
+import { localizedPath, type Locale } from '../../i18n/config';
+import { homeCopy } from '../../i18n/content';
+import { getUi } from '../../i18n/ui';
+import type { PostSummary } from '../../lib/posts';
+
+interface Props {
+  locale: Locale;
+  posts: PostSummary[];
+}
+
+const { locale, posts } = Astro.props;
+const chapter = chapters[3];
+const copy = homeCopy[locale].chapters[chapter.id];
+const ui = getUi(locale);
+const blogPath = localizedPath(locale, '/blog');
+const postsPath = localizedPath(locale, '/posts');
+const next = chapters[4];
+const nextCopy = homeCopy[locale].chapters[next.id];
+
+const formatDate = (date: Date) => date.toISOString().slice(0, 10);
+---
+
+<section
+  class="orbit-panel"
+  id={chapter.id}
+  data-chapter={chapter.id}
+  style="--slot:-3"
+  aria-labelledby="low-earth-orbit-title"
+>
+  <div class="orbit-scene"><LowEarthOrbitScene /></div>
+
+  <div class="orbit-panel-inner">
+    <ChapterMarker index={chapter.index} altitude={chapter.altitude} codename={copy.codename} />
+
+    <div class="chapter-head">
+      <p class="tagline" data-reveal>{copy.tagline}</p>
+      <h2 id="low-earth-orbit-title" tabindex="-1" data-reveal>{copy.heading}</h2>
+      <p data-reveal>{copy.description}</p>
+    </div>
+
+    <ul class="post-list">
+      {posts.map((post) => (
+        <li data-reveal>
+          <a class="post-row" href={`${postsPath}/${post.slug}`}>
+            <time datetime={post.date.toISOString()}>{formatDate(post.date)}</time>
+            <strong>{post.title}</strong>
+            <span>{post.category}</span>
+            {post.description && <p>{post.description}</p>}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <div class="panel-foot">
+      <span>{copy.foot}</span>
+      <span class="panel-foot-links">
+        <a href={postsPath}>{ui.readPosts} <span aria-hidden="true">↗</span></a>
+        <a href={`${blogPath}#${next.id}`}>
+          {ui.nextStation} · {nextCopy.name} <span aria-hidden="true">↓</span>
+        </a>
+      </span>
+    </div>
+  </div>
+</section>

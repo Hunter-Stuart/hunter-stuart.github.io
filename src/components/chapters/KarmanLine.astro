@@ -1,0 +1,71 @@
+---
+import ChapterMarker from '../orbit/ChapterMarker.astro';
+import KarmanLineScene from '../orbit/scenes/KarmanLineScene.astro';
+import { chapters } from '../../data/orbit';
+import { getCatalog } from '../../data/catalog';
+import { localizedPath, type Locale } from '../../i18n/config';
+import { homeCopy } from '../../i18n/content';
+import { getUi } from '../../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const chapter = chapters[2];
+const copy = homeCopy[locale].chapters[chapter.id];
+const ui = getUi(locale);
+const { projects } = getCatalog(locale);
+const next = chapters[3];
+const nextCopy = homeCopy[locale].chapters[next.id];
+---
+
+<section
+  class="orbit-panel"
+  id={chapter.id}
+  data-chapter={chapter.id}
+  style="--slot:-2"
+  aria-labelledby="karman-line-title"
+>
+  <div class="orbit-scene"><KarmanLineScene /></div>
+
+  <div class="orbit-panel-inner">
+    <ChapterMarker index={chapter.index} altitude={chapter.altitude} codename={copy.codename} />
+
+    <div class="chapter-head">
+      <p class="tagline" data-reveal>{copy.tagline}</p>
+      <h2 id="karman-line-title" tabindex="-1" data-reveal>{copy.heading}</h2>
+      <p data-reveal>{copy.description}</p>
+    </div>
+
+    <ul class="project-list">
+      {projects.map((project) => (
+        <li class="project-item" data-reveal>
+          <div class="project-item-head">
+            <h4>{project.name}</h4>
+            <span class="project-status">{project.status}</span>
+          </div>
+          <div class="project-body">
+            <p>{project.summary}</p>
+            <div class="project-progress">
+              <div class="stack-track">
+                <span style={`--level:${project.progress}%`} />
+              </div>
+              <span class="mono">{project.progress}%</span>
+            </div>
+            <ul class="tag-list">
+              {project.tags.map((tag) => <li>{tag}</li>)}
+            </ul>
+          </div>
+        </li>
+      ))}
+    </ul>
+
+    <div class="panel-foot">
+      <span>{copy.foot}</span>
+      <a href={`${localizedPath(locale, '/blog')}#${next.id}`}>
+        {ui.nextStation} · {nextCopy.name} <span aria-hidden="true">↓</span>
+      </a>
+    </div>
+  </div>
+</section>

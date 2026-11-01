@@ -1,0 +1,68 @@
+---
+import ChapterMarker from '../orbit/ChapterMarker.astro';
+import GeostationaryScene from '../orbit/scenes/GeostationaryScene.astro';
+import { chapters } from '../../data/orbit';
+import { getCatalog } from '../../data/catalog';
+import { localizedPath, type Locale } from '../../i18n/config';
+import { homeCopy } from '../../i18n/content';
+import { getUi } from '../../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const chapter = chapters[4];
+const copy = homeCopy[locale].chapters[chapter.id];
+const home = homeCopy[locale];
+const ui = getUi(locale);
+const { lifeNotes } = getCatalog(locale);
+// 英文标题更长，卡片少放一张
+const notes = locale === 'en' ? lifeNotes.slice(0, 2) : lifeNotes;
+const next = chapters[5];
+const nextCopy = home.chapters[next.id];
+---
+
+<section
+  class="orbit-panel"
+  id={chapter.id}
+  data-chapter={chapter.id}
+  style="--slot:-4"
+  aria-labelledby="geostationary-title"
+>
+  <div class="orbit-scene"><GeostationaryScene /></div>
+
+  <div class="orbit-panel-inner">
+    <ChapterMarker index={chapter.index} altitude={chapter.altitude} codename={copy.codename} />
+
+    <div class="chapter-head">
+      <p class="tagline" data-reveal>{copy.tagline}</p>
+      <h2 id="geostationary-title" tabindex="-1" data-reveal>{copy.heading}</h2>
+      <p data-reveal>{copy.description}</p>
+    </div>
+
+    <div class="life-grid">
+      {notes.map((note) => (
+        <article class="life-card" data-reveal>
+          <time datetime={note.date}>{note.date}</time>
+          <h4>{note.title}</h4>
+          <p>{note.category}</p>
+        </article>
+      ))}
+    </div>
+
+    <blockquote class="life-quote" data-reveal>{home.quote}</blockquote>
+
+    <div class="panel-foot">
+      <span>{copy.foot}</span>
+      <span class="panel-foot-links">
+        <a href={localizedPath(locale, '/gallery')}>
+          {home.galleryTitle} <span aria-hidden="true">↗</span>
+        </a>
+        <a href={`${localizedPath(locale, '/blog')}#${next.id}`}>
+          {ui.nextStation} · {nextCopy.name} <span aria-hidden="true">↓</span>
+        </a>
+      </span>
+    </div>
+  </div>
+</section>

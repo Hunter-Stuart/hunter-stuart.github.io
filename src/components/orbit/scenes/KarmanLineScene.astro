@@ -1,0 +1,61 @@
+---
+import Rocket from '../Rocket.astro';
+import { tracks } from '../../../data/tracks';
+
+// 03 卡门线 · 100 KM —— 地球曲率第一次出现，大气层只剩薄薄一圈辉光。
+const track = tracks['karman-line'];
+const arc = track.arc!;
+---
+
+<svg
+  viewBox="0 0 1440 900"
+  preserveAspectRatio="xMidYMid slice"
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <g class="scene-star">
+    <circle cx="180" cy="120" r="1.4"></circle>
+    <circle cx="404" cy="66" r="1.1"></circle>
+    <circle cx="612" cy="152" r="1.6"></circle>
+    <circle cx="858" cy="92" r="1.2"></circle>
+    <circle cx="1084" cy="148" r="1.5"></circle>
+    <circle cx="1300" cy="76" r="1.1"></circle>
+    <circle cx="248" cy="252" r="1"></circle>
+    <circle cx="1256" cy="288" r="1"></circle>
+  </g>
+
+  <!-- 地球本体（圆盘边缘在画面下方） -->
+  <circle class="scene-fill--strong" cx="720" cy="1640" r="1000"></circle>
+
+  <!-- 大气层辉光：三层递减 -->
+  <g class="scene-line">
+    <circle cx="720" cy="1640" r="1022"></circle>
+  </g>
+  <g class="scene-line scene-line--faint">
+    <circle cx="720" cy="1640" r="1046"></circle>
+    <circle cx="720" cy="1640" r="1076"></circle>
+  </g>
+
+  <!-- 卡门线刻度 -->
+  <g class="scene-line scene-line--faint">
+    <path d="M120 596h120M120 588v16"></path>
+    <path d="M1200 596h120M1320 588v16"></path>
+  </g>
+
+    <!-- 轨道：画面下方那颗地球的轨道弧，只取画面上三分之一那一段 -->
+  <ellipse
+    class="scene-track"
+    cx={arc.cx}
+    cy={arc.cy}
+    rx={arc.rx}
+    ry={arc.ry}
+    transform={`rotate(${arc.tilt} ${arc.cx} ${arc.cy})`}></ellipse>
+
+  <!-- 运载器：沿这段轨道弧从左划到右，到右端回到左侧重新开始 -->
+  <g class="rocket-mover" data-mode="arc" style={`--scale:${track.scale}`}>
+    <g class="rocket-arc">
+      <Rocket stage={3} />
+    </g>
+  </g>
+</svg>

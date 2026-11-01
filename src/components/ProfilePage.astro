@@ -1,0 +1,110 @@
+---
+import { socialLinks } from '../data/catalog';
+import { localizedPath, type Locale } from '../i18n/config';
+import { identity, profileCopy } from '../i18n/content';
+import { getUi } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const copy = profileCopy[locale];
+const site = identity[locale];
+const ui = getUi(locale);
+const blogPath = localizedPath(locale, '/blog');
+---
+
+<main id="main-content" class="page">
+  <div class="shell">
+    <article class="resume">
+      <!-- 左栏：照片 + 联系方式 + 方向 -->
+      <aside class="resume-side">
+        <figure class="resume-photo">
+          <img
+            src="/media/profile-photo.jpg"
+            width="480"
+            height="640"
+            alt={site.localName}
+            loading="eager"
+            decoding="async"
+          />
+          <figcaption class="mono">{site.location}</figcaption>
+        </figure>
+
+        <section class="resume-block resume-identity">
+          <h2>{copy.identityTitle}</h2>
+          <ul class="resume-titles">
+            {copy.titles.map((item) => <li>{item}</li>)}
+          </ul>
+        </section>
+
+        <section class="resume-block">
+          <h2>{copy.contactTitle}</h2>
+          <ul class="resume-contact">
+            <li>
+              <span class="mono">{ui.emailPrimary}</span>
+              <a href={`mailto:${site.email}`}>{site.email}</a>
+            </li>
+            {site.altEmails.map((item) => (
+              <li>
+                <span class="mono">{item.label}</span>
+                <a href={`mailto:${item.address}`}>{item.address}</a>
+              </li>
+            ))}
+            {socialLinks.map((link) => (
+              <li>
+                <span class="mono">{link.label}</span>
+                <a href={link.href} rel="me noopener" target="_blank">{link.label} ↗</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section class="resume-block">
+          <h2>{copy.directionTitle}</h2>
+          <ul class="resume-tags">
+            {copy.directionTags.map((tag) => <li>{tag}</li>)}
+          </ul>
+        </section>
+
+        <a class="button" href={blogPath}>
+          {ui.readBlog}
+          <span aria-hidden="true">↗</span>
+        </a>
+      </aside>
+
+      <!-- 右栏：正文 -->
+      <div class="resume-main">
+        <header class="resume-head">
+          <p class="mono resume-overline">{copy.overline}</p>
+          <h1>{copy.title}</h1>
+          <p class="resume-role">{copy.role}</p>
+          <p class="resume-summary">{copy.summary}</p>
+        </header>
+
+        {copy.sections.map((section) => (
+          <section class="resume-section">
+            <div class="resume-section-head">
+              <h2>{section.title}</h2>
+              <span class="mono">{String(section.items.length).padStart(2, '0')}</span>
+            </div>
+            <ul class="resume-timeline">
+              {section.items.map((item) => (
+                <li>
+                  <span class="mono resume-period">{item.period}</span>
+                  <div>
+                    <strong>{item.title}</strong>
+                    <p>{item.detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+
+        <p class="resume-note">{copy.contactNote}</p>
+      </div>
+    </article>
+  </div>
+</main>

@@ -1,0 +1,42 @@
+---
+import DeepSpace from './chapters/DeepSpace.astro';
+import Geostationary from './chapters/Geostationary.astro';
+import KarmanLine from './chapters/KarmanLine.astro';
+import LaunchPad from './chapters/LaunchPad.astro';
+import LowEarthOrbit from './chapters/LowEarthOrbit.astro';
+import Troposphere from './chapters/Troposphere.astro';
+import OrbitNavigation from './orbit/OrbitNavigation.astro';
+import { motionStyles } from '../data/tracks';
+import type { Locale } from '../i18n/config';
+import { pickFeatured, type PostSummary } from '../lib/posts';
+
+interface Props {
+  locale: Locale;
+  posts: PostSummary[];
+}
+
+const { locale, posts } = Astro.props;
+
+// 英文文案更长，条目数收一格，保证每屏仍是一页
+const featuredLimit = locale === 'en' ? 3 : 4;
+const postLimit = locale === 'en' ? 4 : 6;
+---
+
+<!-- 在轨章节的巡航关键帧由 src/data/tracks.ts 从轨道曲线采样生成 -->
+<style is:inline set:html={motionStyles}></style>
+
+<main id="main-content" tabindex="-1">
+  <div class="orbit-home" data-orbit-home>
+    <LaunchPad {locale} featured={pickFeatured(posts, featuredLimit)} />
+    <Troposphere {locale} />
+    <KarmanLine {locale} />
+    <LowEarthOrbit {locale} posts={posts.slice(0, postLimit)} />
+    <Geostationary {locale} />
+    <DeepSpace {locale} />
+    <OrbitNavigation {locale} />
+  </div>
+</main>
+
+<script>
+  import '../scripts/orbit-journey';
+</script>

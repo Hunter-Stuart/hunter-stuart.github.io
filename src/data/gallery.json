@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-11-01",
+  "categories": [
+    {
+      "id": "travel",
+      "label": "旅行",
+      "photos": [
+        {
+          "src": "/media/gallery/travel/jiuzhaigou-20251001.jpg",
+          "width": 900,
+          "height": 1600,
+          "place": "旅行",
+          "date": "2025-10",
+          "caption": "水太清了，看久了会失去深度感"
+        }
+      ]
+    },
+    {
+      "id": "life",
+      "label": "日常",
+      "photos": [
+        {
+          "src": "/media/gallery/life/chengdu-night-20261101.jpg",
+          "width": 1200,
+          "height": 1600,
+          "place": "日常",
+          "date": "2026-11",
+          "caption": "夜里十点，灯比人还多"
+        },
+        {
+          "src": "/media/gallery/life/cycling-road-20241001.jpg",
+          "width": 1200,
+          "height": 900,
+          "place": "日常",
+          "date": "2024-10",
+          "caption": "骑到没有树荫的那一段"
+        }
+      ]
+    }
+  ]
+}

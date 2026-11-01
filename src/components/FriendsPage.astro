@@ -1,0 +1,43 @@
+---
+import { getCatalog } from '../data/catalog';
+import { localizedPath, type Locale } from '../i18n/config';
+import { getUi } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const ui = getUi(locale);
+const { friends } = getCatalog(locale);
+---
+
+<main id="main-content" class="page">
+  <div class="shell">
+    <header class="page-head">
+      <p class="eyebrow">NETWORK / FRIENDS</p>
+      <h1>{ui.friendsTitle}</h1>
+      <p>{ui.friendsIntro}</p>
+    </header>
+
+    <ul class="friend-grid">
+      {friends.map((friend) => (
+        <li>
+          <a href={friend.href} target="_blank" rel="noopener noreferrer">
+            <strong>
+              {friend.name}
+              {friend.realName && <em>{friend.realName}</em>}
+            </strong>
+            {friend.note && <span>{friend.note}</span>}
+            <i aria-hidden="true">↗</i>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <div class="article-foot">
+      <a class="button" href={localizedPath(locale, '/blog')}>{ui.nav.blog}</a>
+      <a class="button" href={localizedPath(locale, '/profile')}>{ui.nav.profile}</a>
+    </div>
+  </div>
+</main>

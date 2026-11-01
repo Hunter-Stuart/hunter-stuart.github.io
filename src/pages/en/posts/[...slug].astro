@@ -1,0 +1,27 @@
+---
+import PostPage from '../../../components/PostPage.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getPostEntries, slugOf } from '../../../lib/posts';
+import '../../../styles/reading.css';
+
+const locale = 'en' as const;
+
+export async function getStaticPaths() {
+  const entries = await getPostEntries('en');
+  return entries.map((post) => ({
+    params: { slug: slugOf(post.id) },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+---
+
+<BaseLayout
+  locale={locale}
+  title={post.data.title}
+  description={post.data.description}
+  alternatePath={`/posts/${slugOf(post.id)}`}
+>
+  <PostPage {locale} {post} />
+</BaseLayout>

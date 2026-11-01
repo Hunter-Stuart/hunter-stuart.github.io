@@ -1,0 +1,119 @@
+---
+/**
+ * 随章节变形的运载器。输出的是 <g>，由章节场景的 <svg> 包裹，
+ * 因此和轨道共用同一套 viewBox 坐标，永远贴在轨迹上。
+ *
+ * stage 1  发射台   完整构型：整流罩 + 二级 + 一级 + 两枚助推器，尾焰最强
+ * stage 2  对流层   助推器仍在，尾焰拉长，两侧气流被压开
+ * stage 3  卡门线   助推器已分离，只剩芯级
+ * stage 4  近地轨道 整流罩两片外翻，卫星露出，太阳翼半展开
+ * stage 5  同步轨道 卫星完全展开
+ * stage 6  深空     卫星缩小远去
+ */
+
+interface Props {
+  stage: 1 | 2 | 3 | 4 | 5 | 6;
+}
+
+const { stage } = Astro.props;
+
+const hasBoosters = stage <= 2;
+const hasFlame = stage <= 3;
+const flameLong = stage <= 2;
+const hasAirflow = stage <= 2;
+const hasFairing = stage <= 3;
+const fairingOpen = stage >= 4;
+const hasCore = stage <= 4;
+const hasStage2 = stage <= 4;
+const hasSatellite = stage >= 4;
+const wingsDeployed = stage >= 5;
+---
+
+<g class="rocket" data-rocket={stage}>
+  {hasFlame && (
+    <g class="rocket-flame">
+      <path
+        class="rocket-flame-outer"
+        d={flameLong ? 'M92 480Q120 660 148 480' : 'M100 480Q120 592 140 480'}
+      />
+      <path
+        class="rocket-flame-inner"
+        d={flameLong ? 'M104 480Q120 588 136 480' : 'M107 480Q120 546 133 480'}
+      />
+      <path class="rocket-flame-core" d="M112 480Q120 528 128 480" />
+    </g>
+  )}
+
+  {hasAirflow && (
+    <g class="rocket-airflow">
+      <path d="M74 486C30 504 14 548 44 594" />
+      <path d="M166 486C210 504 226 548 196 594" />
+      <path d="M86 500C58 520 50 552 66 584" />
+      <path d="M154 500C182 520 190 552 174 584" />
+    </g>
+  )}
+
+  {hasBoosters && (
+    <g class="rocket-boosters">
+      <g class="rocket-booster rocket-booster--left">
+        <path class="rocket-part" d="M70 250h26v226H70z" />
+        <path class="rocket-part" d="M70 250q13-34 26 0" />
+      </g>
+      <g class="rocket-booster rocket-booster--right">
+        <path class="rocket-part" d="M144 250h26v226h-26z" />
+        <path class="rocket-part" d="M144 250q13-34 26 0" />
+      </g>
+      <path class="rocket-detail" d="M70 322h26M144 322h26M70 400h26M144 400h26" />
+    </g>
+  )}
+
+  {hasCore && (
+    <g class="rocket-core">
+      <path class="rocket-part" d="M96 258h48v220H96z" />
+      <path class="rocket-detail" d="M96 336h48M96 412h48" />
+      <path class="rocket-detail" d="M96 478h48M104 478l-6 16M136 478l6 16" />
+    </g>
+  )}
+
+  {hasStage2 && (
+    <g class="rocket-stage2">
+      <path class="rocket-part" d="M96 152h48v104H96z" />
+      <path class="rocket-detail" d="M96 250h48" />
+    </g>
+  )}
+
+  {hasFairing && (
+    <g class="rocket-fairing">
+      <path class="rocket-part" d="M96 152q24-92 48 0" />
+      <path class="rocket-detail" d="M120 64v88" />
+    </g>
+  )}
+
+  {fairingOpen && (
+    <g class="rocket-fairing-open">
+      <path class="rocket-part" d="M96 152q-30-40-58-64" />
+      <path class="rocket-part" d="M144 152q30-40 58-64" />
+    </g>
+  )}
+
+  {hasSatellite && (
+    <g class="rocket-satellite">
+      <path class="rocket-part" d="M104 112h32v58h-32z" />
+      <path class="rocket-detail" d="M104 132h32M120 112v58" />
+      <path class="rocket-detail" d="M120 92v20" />
+      <circle class="rocket-node" cx="120" cy="86" r="4" />
+      {wingsDeployed ? (
+        <>
+          <path class="rocket-part rocket-wing" d="M104 124H34v22h70z" />
+          <path class="rocket-part rocket-wing" d="M136 124h70v22h-70z" />
+          <path class="rocket-detail" d="M58 124v22M82 124v22M158 124v22M182 124v22" />
+        </>
+      ) : (
+        <>
+          <path class="rocket-part rocket-wing" d="M104 126h-40v16h40z" />
+          <path class="rocket-part rocket-wing" d="M136 126h40v16h-40z" />
+        </>
+      )}
+    </g>
+  )}
+</g>

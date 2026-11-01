@@ -1,0 +1,20 @@
+---
+import BlogPage from '../components/BlogPage.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { identity } from '../i18n/content';
+import { getPosts } from '../lib/posts';
+import '../styles/home.css';
+
+const locale = 'zh' as const;
+const posts = await getPosts(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={identity[locale].title}
+  description={identity[locale].description}
+  alternatePath="/blog"
+  fullViewport
+>
+  <BlogPage {locale} {posts} />
+</BaseLayout>

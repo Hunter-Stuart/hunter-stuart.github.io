@@ -1,0 +1,20 @@
+---
+import PostListPage from '../../../components/PostListPage.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getUi } from '../../../i18n/ui';
+import { getPosts } from '../../../lib/posts';
+import '../../../styles/reading.css';
+
+const locale = 'en' as const;
+const posts = await getPosts(locale);
+const ui = getUi(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={ui.postsIndexTitle}
+  description={ui.postsIndexIntro(posts.length)}
+  alternatePath="/posts"
+>
+  <PostListPage {locale} {posts} />
+</BaseLayout>

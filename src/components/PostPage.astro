@@ -1,0 +1,61 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import { localizedPath, type Locale } from '../i18n/config';
+import { getUi } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+  post: CollectionEntry<'posts'>;
+}
+
+const { locale, post } = Astro.props;
+const ui = getUi(locale);
+const { Content, headings } = await render(post);
+const postsPath = localizedPath(locale, '/posts');
+const blogPath = localizedPath(locale, '/blog');
+const toc = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+---
+
+<main id="main-content" class="page">
+  <div class="shell">
+    <article class="article">
+      <header class="article-head">
+        <p class="eyebrow">{post.data.category} / {post.data.date.toISOString().slice(0, 10)}</p>
+        <h1>{post.data.title}</h1>
+        {post.data.description && <p class="article-lede">{post.data.description}</p>}
+        {post.data.tags.length > 0 && (
+          <ul class="tag-list">
+            {post.data.tags.map((tag) => <li>{tag}</li>)}
+          </ul>
+        )}
+      </header>
+
+      <div class="article-body">
+        <div class="prose">
+          <Content />
+        </div>
+
+        {toc.length > 1 && (
+          <aside class="article-toc">
+            <p class="mono">{ui.toc}</p>
+            <ol>
+              {toc.map((heading) => (
+                <li class:list={{ 'depth-3': heading.depth === 3 }}>
+                  <a href={`#${heading.slug}`}>{heading.text}</a>
+                </li>
+              ))}
+            </ol>
+          </aside>
+        )}
+      </div>
+
+      <footer class="article-foot">
+        <a class="button" href={postsPath}>
+          <span aria-hidden="true">←</span>
+          {ui.backToPosts}
+        </a>
+        <a class="button" href={blogPath}>{ui.nav.blog}</a>
+      </footer>
+    </article>
+  </div>
+</main>

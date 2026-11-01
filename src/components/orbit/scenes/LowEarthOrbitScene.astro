@@ -1,0 +1,57 @@
+---
+import Rocket from '../Rocket.astro';
+import { tracks } from '../../../data/tracks';
+
+// 04 近地轨道 · 400 KM —— 卫星在轨道上掠过昼夜线，脚下是完整的地平线。
+const track = tracks['low-earth-orbit'];
+const arc = track.arc!;
+---
+
+<svg
+  viewBox="0 0 1440 900"
+  preserveAspectRatio="xMidYMid slice"
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <g class="scene-star">
+    <circle cx="132" cy="108" r="1.4"></circle>
+    <circle cx="288" cy="196" r="1"></circle>
+    <circle cx="436" cy="88" r="1.2"></circle>
+    <circle cx="606" cy="164" r="1"></circle>
+    <circle cx="742" cy="66" r="1.5"></circle>
+    <circle cx="918" cy="150" r="1.1"></circle>
+    <circle cx="1092" cy="92" r="1.3"></circle>
+    <circle cx="1274" cy="204" r="1"></circle>
+    <circle cx="352" cy="288" r="1"></circle>
+    <circle cx="1178" cy="330" r="1.2"></circle>
+    <circle cx="190" cy="384" r="1"></circle>
+    <circle cx="668" cy="262" r="1"></circle>
+  </g>
+
+  <!-- 地球弧：圆盘边缘在 y≈560 -->
+  <circle class="scene-fill" cx="720" cy="1620" r="1060"></circle>
+  <g class="scene-line">
+    <circle cx="720" cy="1620" r="1062"></circle>
+  </g>
+  <g class="scene-line scene-line--faint">
+    <path d="M300 700c130-26 260-30 420-30M760 670c150 0 280 6 400 30"></path>
+    <path d="M420 760c90-14 180-18 300-18M760 742c110 0 210 4 300 18"></path>
+  </g>
+
+    <!-- 轨道：画面下方那颗地球的轨道弧，只取画面上三分之一那一段 -->
+  <ellipse
+    class="scene-track"
+    cx={arc.cx}
+    cy={arc.cy}
+    rx={arc.rx}
+    ry={arc.ry}
+    transform={`rotate(${arc.tilt} ${arc.cx} ${arc.cy})`}></ellipse>
+
+  <!-- 运载器：沿这段轨道弧从左划到右，到右端回到左侧重新开始 -->
+  <g class="rocket-mover" data-mode="arc" style={`--scale:${track.scale}`}>
+    <g class="rocket-arc">
+      <Rocket stage={4} />
+    </g>
+  </g>
+</svg>

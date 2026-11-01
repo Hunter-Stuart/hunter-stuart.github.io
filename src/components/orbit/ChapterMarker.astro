@@ -1,0 +1,18 @@
+---
+interface Props {
+  index: string;
+  altitude: string;
+  codename: string;
+}
+
+const { index, altitude, codename } = Astro.props;
+---
+
+<p class="chapter-marker">
+  <b aria-hidden="true">{index}</b>
+  <span>
+    <i>{altitude}</i>
+    <span aria-hidden="true">/</span>
+    {codename}
+  </span>
+</p>

@@ -1,0 +1,58 @@
+---
+import { getCatalog } from '../data/catalog';
+import gallery from '../data/gallery.json';
+import { localizedPath, type Locale } from '../i18n/config';
+import { getUi } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const ui = getUi(locale);
+const total = gallery.categories.reduce((sum, category) => sum + category.photos.length, 0);
+---
+
+<main id="main-content" class="page">
+  <div class="shell">
+    <header class="page-head">
+      <p class="eyebrow">GALLERY / {total} FRAMES</p>
+      <h1>{ui.galleryTitle}</h1>
+      <p>{ui.galleryIntro}</p>
+    </header>
+
+    {gallery.categories.map((category) => (
+      <section class="gallery-section">
+        <div class="year-heading">
+          <h2>{category.label}</h2>
+          <span class="mono">{String(category.photos.length).padStart(2, '0')}</span>
+        </div>
+        <ul class="photo-grid">
+          {category.photos.map((photo) => (
+            <li>
+              <figure>
+                <img
+                  src={photo.src}
+                  width={photo.width}
+                  height={photo.height}
+                  alt={photo.caption || photo.place}
+                  loading="lazy"
+                  decoding="async"
+                />
+                <figcaption>
+                  <span>{photo.caption || photo.place}</span>
+                  <small class="mono">{photo.place} · {photo.date}</small>
+                </figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+
+    <div class="article-foot">
+      <a class="button" href={localizedPath(locale, '/blog')}>{ui.nav.blog}</a>
+      <a class="button" href={localizedPath(locale, '/profile')}>{ui.nav.profile}</a>
+    </div>
+  </div>
+</main>
