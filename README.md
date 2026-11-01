@@ -2,7 +2,7 @@
 
 按「离地高度」编排的个人站点：卫星从发射台升到月球以远，博客首页就是六段轨道。中英双语，`/` 是中文、`/en` 是英文。
 
-由 Hexo 迁移到 Astro 重建，旧脚手架完整保留在 `legacy-hexo/`。
+由 Hexo 迁移到 Astro 重建（旧的 Hexo 脚手架已清理）。
 
 > **只想改内容、发文章、换照片？看 [操作手册 MANUAL.md](./MANUAL.md)。**
 > 本文档讲的是架构、设计取舍和实现细节。
@@ -254,13 +254,4 @@ public/media/gallery/**      src/data/gallery.json
 
 推送到 `main` 触发 `.github/workflows/deploy.yml`：构建 `dist/` 并通过 GitHub Pages 发布。
 
-首次部署前需要在仓库 Settings → Pages 里把 **Source** 设为 **GitHub Actions**（旧的 `hexo deploy` 方式不再使用）。
-
-## 回滚到 Hexo
-
-旧的 `_config.yml`、`source/`、`themes/`、`package.hexo.json` 都完整保留在 `legacy-hexo/`：
-
-```powershell
-Get-ChildItem legacy-hexo
-# 需要时把它们移回根目录，并把 package.hexo.json 恢复成 package.json 后重新 npm install
-```
+首次部署前需要在仓库 Settings → Pages 里把 **Source** 设为 **GitHub Actions**。

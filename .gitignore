@@ -16,11 +16,6 @@ pnpm-debug.log*
 .env.production
 .env.local
 
-# legacy hexo artefacts
-db.json
-legacy-hexo/db.json
-legacy-hexo/node_modules/
-legacy-hexo/public/
 
 # editors / OS
 .DS_Store
