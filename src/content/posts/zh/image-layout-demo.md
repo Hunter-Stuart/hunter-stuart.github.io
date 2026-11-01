@@ -1,6 +1,6 @@
 ---
 title: 图片排版示范：怎么在文章里放图
-description: 一篇可以直接删掉的示范文章，把常用的几种图片排版都跑一遍。
+description: 一篇写作示范文章，把常用的几种图片排版都跑一遍。
 date: 2026-11-01
 category: 建站
 tags: [Markdown, 图片, 排版]

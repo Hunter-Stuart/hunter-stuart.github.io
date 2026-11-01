@@ -1,6 +1,6 @@
 ---
 title: 'Image layout demo: putting pictures in a post'
-description: A demo post you can delete — every common image layout, with real files.
+description: A demo post — every common image layout, with real files.
 date: 2026-11-01
 category: Meta
 tags: [Markdown, Images, Layout]
