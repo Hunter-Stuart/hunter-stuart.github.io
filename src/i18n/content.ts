@@ -244,8 +244,8 @@ export const welcomeCopy: Record<Locale, WelcomeCopy> = {
     welcome: '此处记录',
     overline: 'EVERYTHING INDEXED BY ALTITUDE',
     title: '从地面到深空|一路写成六章',
-    intro: ['六站的记录：技术、项目与日常，按离地高度逐级排列。', '左边是我这个人，右边是我写下的东西。'],
-    divider: '先选一个高度',
+    intro: ['六节点记录：技术、项目与日常，按离地高度逐级排列。', '左边是我这个人，右边是我写下的东西。'],
+    divider: '先选一个方向',
     resumeTitle: '这个人',
     resumeLines: ['专业、经历，以及正在做的事。', '尽量具体，不加修饰。'],
     resumeCta: 'BORN ON THE GROUND',
@@ -318,7 +318,7 @@ export const profileCopy: Record<Locale, ProfileCopy> = {
       '电子科技大学通信工程本科在读。做过后端、嵌入式前端与阵列信号处理三类项目，习惯先把复杂系统拆成模块，再把链路一段段接起来。',
     identityTitle: '身份',
     titles: [
-      '中共党员',
+      '中共预备党员',
       '电子科技大学 · 本科在读',
       '信通学院科研育人计划（鸿鹄）· 天地一体化',
       '英才科协骨干成员',
@@ -424,7 +424,7 @@ export const profileCopy: Record<Locale, ProfileCopy> = {
       'Undergraduate in Communication Engineering at UESTC. I have built things across backend, embedded hardware and array signal processing, and I like taking a complex system apart into modules before wiring the whole chain back together.',
     identityTitle: 'Identity',
     titles: [
-      'Member of the CPC',
+      'Probationary Member of the CPC',
       'Undergraduate, UESTC',
       'Honghu research programme · space-ground integration',
       'Core member, Yingcai Sci-Tech Association',

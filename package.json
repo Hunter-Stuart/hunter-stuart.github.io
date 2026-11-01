@@ -12,8 +12,7 @@
     "textures": "node scripts/generate-textures.mjs",
     "gallery": "node scripts/build-gallery.mjs",
     "i18n:check": "node scripts/check-i18n.ts",
-    "preview": "astro preview",
-    "check": "astro check"
+    "preview": "astro preview"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
