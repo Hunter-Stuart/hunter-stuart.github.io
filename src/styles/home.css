@@ -75,7 +75,8 @@
   gap: clamp(1.75rem, 4vh, 3rem);
   margin-inline: auto;
   margin-block: auto;
-  padding-block: clamp(3rem, 8vh, 5.5rem) clamp(2rem, 5vh, 3.5rem);
+  /* 上下本来差 1rem+，内容撑满时整块会明显往下沉；收窄差距 */
+  padding-block: clamp(2.25rem, 5.5vh, 3.75rem) clamp(2rem, 5vh, 3.5rem);
   /* 右侧让出轨道空域：文字列靠左，运载器在右上飞行 */
   padding-right: min(32vw, 26rem);
   /* 内容高于一屏时在本屏内部滚动，场景背景保持不动 */
@@ -1891,4 +1892,32 @@ a.life-card:hover h4 span {
 [data-scroll-area][data-at-top][data-at-bottom],
 [data-scroll-area][data-static] {
   mask-image: none;
+}
+/* --------------------------------------------------------------------------
+   英文版排版
+   同样内容英文普遍比中文长三到五成，换行更多。
+   .orbit-panel-inner 用 margin-block: auto 居中，中文有留白、
+   英文撑满后从 padding-top 起步，于是英文整块看起来更靠下、也更挤。
+   这里把间距和上留白一起收紧，让两种语言的首行位置接近。
+   -------------------------------------------------------------------------- */
+
+:lang(en) .orbit-panel-inner {
+  gap: clamp(1.25rem, 3vh, 2.25rem);
+  padding-block: clamp(1.75rem, 4.5vh, 3rem) clamp(1.75rem, 4vh, 3rem);
+}
+
+/* 英文标题行数多，行距收一点 */
+:lang(en) .chapter-head h1,
+:lang(en) .chapter-head h2,
+:lang(en) .pad-copy h1 {
+  line-height: 1.05;
+}
+
+/* 正文与说明文字的段落间距同步收紧 */
+:lang(en) .chapter-head {
+  gap: clamp(0.5rem, 1.4vh, 0.9rem);
+}
+
+:lang(en) .pad-copy {
+  gap: clamp(0.85rem, 2.2vh, 1.15rem);
 }
