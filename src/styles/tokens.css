@@ -142,7 +142,9 @@
 
   --art-texture-opacity: 0.3;
   --art-blend: soft-light;
-  --art-star-opacity: 0;
+  /* 油画的浅色版是黄昏天空，星星得留着——这里是 0 会让「跟随系统浅色」的
+     访客（大多数）完全看不到星空，看起来就像星星没做 */
+  --art-star-opacity: 0.45;
   --art-ink-blot: 0;
 }
 

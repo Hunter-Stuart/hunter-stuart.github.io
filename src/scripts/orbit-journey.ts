@@ -26,8 +26,24 @@ function apply(index: number, direction: 1 | -1, animate: boolean, oldIndex = -1
 
   if (!animate) home?.classList.add('no-transition');
 
+  /**
+   * 目标屏先无过渡地归位到上方（-1）。
+   * 不这么做的话，从第 6 屏退回第 5 屏时，第 5 屏本身正停在下方（slot 1），
+   * 过渡就是「从下往上」，和 1 → 2 的「从上往下」不是一回事。
+   * 强制重排一次，让接下来 0 → 的过渡从上方起步。
+   */
+  if (animate) {
+    target?.classList.remove('is-moving');
+    target?.style.setProperty('--slot', '-1');
+    void target?.offsetWidth;
+  }
+
   panels.forEach((panel, i) => {
-    const slot = i === clamped ? 0 : i < clamped ? (direction > 0 ? 1 : -1) : direction > 0 ? -1 : 1;
+    /**
+     * 六屏永远按「新屏从上方落下、旧屏向下退出」运动，不随翻页方向翻转。
+     * 固定：目标屏 → 0，刚离开的那屏 → 1（下方），其余全部堆在上方（-1）。
+     */
+    const slot = i === clamped ? 0 : i === oldIndex ? 1 : -1;
     const involved = animate && (i === clamped || i === oldIndex);
 
     panel.classList.toggle('is-moving', involved);
@@ -273,3 +289,35 @@ if (home && panels.length > 0) {
     if (index >= 0 && index !== current) apply(index, index > current ? 1 : -1, true, current);
   });
 }
+
+/* --------------------------------------------------------------------------
+   局部滚动区域：边缘淡出状态
+   容器滚到顶就没有顶部渐隐，到底就没有底部渐隐。
+   不做这个的话，固定遮罩会把第一行/最后一行淡掉，看着像内容缺了半边。
+   -------------------------------------------------------------------------- */
+
+function syncScrollEdges(area: HTMLElement) {
+  const overflow = area.scrollHeight - area.clientHeight;
+  const isStatic = overflow <= 2;
+
+  // 内容本来就没溢出：不给遮罩，也不显示滚动条行为
+  area.toggleAttribute('data-static', isStatic);
+  area.toggleAttribute('data-at-top', isStatic || area.scrollTop <= 1);
+  area.toggleAttribute('data-at-bottom', isStatic || area.scrollTop >= overflow - 1);
+}
+
+const scrollAreas = [...document.querySelectorAll<HTMLElement>('[data-scroll-area]')];
+
+for (const area of scrollAreas) {
+  area.addEventListener('scroll', () => syncScrollEdges(area), { passive: true });
+  syncScrollEdges(area);
+}
+
+// 视口变化会改变容器高度，边界状态要重算
+window.addEventListener(
+  'resize',
+  () => {
+    for (const area of scrollAreas) syncScrollEdges(area);
+  },
+  { passive: true },
+);

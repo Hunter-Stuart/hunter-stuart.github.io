@@ -343,6 +343,14 @@
 }
 
 /* 精选日志 */
+/* 右栏：精选日志 + 章节导引，竖着排，把首页压进一屏 */
+.pad-side {
+  display: grid;
+  gap: clamp(1.25rem, 3vh, 2rem);
+  align-content: end;
+  min-width: 0;
+}
+
 .pad-featured {
   display: grid;
   gap: 0.5rem;
@@ -380,7 +388,7 @@
   letter-spacing: 0.08em;
 }
 
-/* 封面底部的章节入口 */
+/* 章节入口：默认两列放底部，宽屏挪进右栏改竖排单列 */
 .pad-routes {
   display: grid;
   margin: 0;
@@ -391,9 +399,34 @@
   border-top: 1px solid var(--line);
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 48rem) and (max-width: 77.99rem) {
   .pad-routes {
     grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* 右栏里：一行一条，省掉三行堆叠的高度 */
+@media (min-width: 78rem) {
+  .pad-routes {
+    grid-template-columns: minmax(0, 1fr);
+    border-top: 0;
+  }
+
+  .pad-routes a {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  }
+
+  .pad-routes a:last-child {
+    border-bottom: 0;
+  }
+
+  .pad-routes strong {
+    justify-self: end;
+    text-align: end;
   }
 }
 
@@ -754,7 +787,6 @@
   overscroll-behavior: contain;
   scrollbar-width: thin;
   /* 上下边缘淡出，暗示这里可以滚 */
-  mask-image: linear-gradient(to bottom, transparent 0, #000 0.6rem, #000 calc(100% - 0.9rem), transparent 100%);
 }
 
 .friend-list:focus-visible {
@@ -837,14 +869,6 @@
   border-bottom: 1px solid color-mix(in srgb, var(--scene-accent) 50%, transparent);
 }
 
-.finale {
-  display: grid;
-  gap: 0.6rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 0.85rem;
-}
 
 /* ==========================================================================
    章节页脚：去下一站
@@ -1738,6 +1762,24 @@
    到边界后才翻章，所以翻页逻辑不用改。
    -------------------------------------------------------------------------- */
 
+/* 第二章：技术栈。组多了在网格内滚，不把章节撑长 */
+.stack-grid[data-scroll-area] {
+  max-height: clamp(14rem, 38vh, 24rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding-right: 0.75rem;
+}
+
+/* 第四章：文章列表 */
+.post-list[data-scroll-area] {
+  max-height: clamp(14rem, 38vh, 24rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding-right: 0.75rem;
+}
+
 .project-list[data-scroll-area] {
   max-height: clamp(15rem, 40vh, 25rem);
   overflow-y: auto;
@@ -1747,7 +1789,6 @@
   padding-right: 0.75rem;
   border-top: 1px solid var(--line);
   /* 上下边缘淡出，和友链列表一致：暗示这里可以滚 */
-  mask-image: linear-gradient(to bottom, transparent 0, #000 0.6rem, #000 calc(100% - 0.9rem), transparent 100%);
 }
 
 .life-grid[data-scroll-area] {
@@ -1757,7 +1798,6 @@
   scrollbar-width: thin;
   padding-right: 0.75rem;
   align-content: start;
-  mask-image: linear-gradient(to bottom, transparent 0, #000 0.6rem, #000 calc(100% - 0.9rem), transparent 100%);
 }
 
 .project-list[data-scroll-area]::-webkit-scrollbar,
@@ -1815,4 +1855,40 @@ a.life-card h4 span {
 
 a.life-card:hover h4 span {
   transform: translate(2px, -2px);
+}
+/* --------------------------------------------------------------------------
+   局部滚动区域：边缘淡出
+   固定写死上下渐隐会把第一行/最后一行淡掉，看起来像内容缺了边。
+   改成由 JS 打 data-at-top / data-at-bottom 标记，
+   滚到顶就没有顶部渐隐，到底就没有底部渐隐——内容永远是完整的。
+   -------------------------------------------------------------------------- */
+
+[data-scroll-area] {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding-right: 0.75rem;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 0.6rem,
+    #000 calc(100% - 0.9rem),
+    transparent 100%
+  );
+}
+
+/* 已在顶部：顶部不再淡出 */
+[data-scroll-area][data-at-top] {
+  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 0.9rem), transparent 100%);
+}
+
+/* 已在底部：底部不再淡出 */
+[data-scroll-area][data-at-bottom] {
+  mask-image: linear-gradient(to bottom, transparent 0, #000 0.6rem, #000 100%);
+}
+
+/* 两端都到头，或者内容根本没溢出：完全不要遮罩 */
+[data-scroll-area][data-at-top][data-at-bottom],
+[data-scroll-area][data-static] {
+  mask-image: none;
 }

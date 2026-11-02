@@ -65,35 +65,37 @@ const formatDate = (date: Date) =>
         </div>
       </div>
 
-      <div class="pad-featured" data-reveal>
-        <div class="section-heading">
-          <h3>{copy.featured}</h3>
-          <span>{copy.featuredTag}</span>
+      <div class="pad-side" data-reveal>
+        <div class="pad-featured">
+          <div class="section-heading">
+            <h3>{copy.featured}</h3>
+            <span>{copy.featuredTag}</span>
+          </div>
+          <ul class="pad-featured-list">
+            {featured.map((post) => (
+              <li>
+                <a href={`${postsPath}/${post.slug}`}>
+                  <time datetime={post.date.toISOString()}>{formatDate(post.date)}</time>
+                  <strong>{post.title}</strong>
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
-        <ul class="pad-featured-list">
-          {featured.map((post) => (
-            <li>
-              <a href={`${postsPath}/${post.slug}`}>
-                <time datetime={post.date.toISOString()}>{formatDate(post.date)}</time>
-                <strong>{post.title}</strong>
-              </a>
-            </li>
+
+        <nav class="pad-routes" aria-label={ui.dockLabel}>
+          {routes.map((route) => (
+            <a
+              href={`${blogPath}#${route.id}`}
+              style={`--route-accent: var(--accent-${route.id})`}
+            >
+              <i aria-hidden="true" />
+              <small>{route.index} · {route.altitude}</small>
+              <strong>{copy.chapters[route.id].name}</strong>
+            </a>
           ))}
-        </ul>
+        </nav>
       </div>
     </div>
-
-    <nav class="pad-routes" aria-label={ui.dockLabel} data-reveal>
-      {routes.map((route) => (
-        <a
-          href={`${blogPath}#${route.id}`}
-          style={`--route-accent: var(--accent-${route.id})`}
-        >
-          <i aria-hidden="true" />
-          <small>{route.index} · {route.altitude}</small>
-          <strong>{copy.chapters[route.id].name}</strong>
-        </a>
-      ))}
-    </nav>
   </div>
 </section>

@@ -42,7 +42,7 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10);
       <p data-reveal>{copy.description}</p>
     </div>
 
-    <ul class="post-list">
+    <ul class="post-list" data-scroll-area>
       {posts.map((post) => (
         <li data-reveal>
           <a class="post-row" href={`${postsPath}/${post.slug}`}>
