@@ -307,6 +307,11 @@ export interface ProfileCopy {
   directionTags: string[];
   contactNote: string;
   backToBlog: string;
+  /** 荣誉与证书区块 */
+  certTitle: string;
+  certTag: string;
+  certNote: string;
+  certLevels: Record<'national' | 'international' | 'provincial' | 'program' | 'school', string>;
 }
 
 export const profileCopy: Record<Locale, ProfileCopy> = {
@@ -415,6 +420,16 @@ export const profileCopy: Record<Locale, ProfileCopy> = {
     contactTitle: '联系方式',
     contactNote: '指正、建议，或只是打个招呼，都可以写信。',
     backToBlog: '去看博客',
+    certTitle: '荣誉与证书',
+    certTag: 'HONOURS',
+    certNote: '点开看原件。',
+    certLevels: {
+      national: '国家级',
+      international: '国际',
+      provincial: '省部级',
+      program: '培养计划',
+      school: '校级',
+    },
   },
   en: {
     overline: 'PERSONNEL FILE / 01',
@@ -525,5 +540,15 @@ export const profileCopy: Record<Locale, ProfileCopy> = {
     contactTitle: 'Contact',
     contactNote: 'Corrections, suggestions, or just hello — email works.',
     backToBlog: 'Read the blog',
+    certTitle: 'Honours & certificates',
+    certTag: 'HONOURS',
+    certNote: 'Click to view the original.',
+    certLevels: {
+      national: 'National',
+      international: 'International',
+      provincial: 'Provincial',
+      program: 'Programme',
+      school: 'University',
+    },
   },
 };

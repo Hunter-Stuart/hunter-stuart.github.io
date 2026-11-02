@@ -166,7 +166,38 @@ sections: [
 
 身份标签在 `titles` 数组里（左栏照片下方），一行一条。
 
-### 5.2 换简历照片
+### 5.2 加一张证书
+
+简历页有一块「荣誉与证书」，图片在 `public/media/certificates/`，条目在 `src/data/certificates.ts`。
+
+**第一步：压图放进目录**
+
+单张建议长边 1400、100–250 KB。用 sharp 一条命令（项目里已有这个依赖）：
+
+```powershell
+node -e "import('sharp').then(async s=>{const i=await s.default('原图.jpg').rotate().resize({width:1400,height:1400,fit:'inside'}).jpeg({quality:82,mozjpeg:true}).toFile('public/media/certificates/你的名字.jpg');console.log(i.width+'x'+i.height)})"
+```
+
+文件名用英文小写加连字符，它同时是 slug。
+
+**第二步：在 `src/data/certificates.ts` 里加一条**
+
+```ts
+{
+  slug: 'soc-national-2026-first',        // 与图片文件名一致
+  year: '2026',
+  level: 'national',                       // national / international / provincial / program / school
+  title: { zh: '……一等奖', en: '……First Prize' },
+  issuer: { zh: '中国电子教育学会', en: 'China Electronics Education Society' },
+  work: { zh: '作品名', en: 'Project name' },   // 可选
+},
+```
+
+级别决定排序权重（国家级永远在前），同级按年份倒序。数组顺序不用管，`sortedCertificates` 会自动排。
+
+**第三步：** `npm run build` —— 数量会显示在区块标题右边。
+
+### 5.3 换简历照片
 
 替换 **`public/media/profile-photo.jpg`**，建议 **480×640（3:4）**，控制在 100 KB 以内。
 
@@ -443,6 +474,7 @@ src/
 │   └── journal/             日志周表（Markdown 表格）
 ├── data/
 │   ├── catalog.ts           技术栈 / 友链
+│   ├── certificates.ts      荣誉证书条目
 │   ├── journal/             日志周表（CSV 格式的可放这里）
 │   ├── gallery.json         相册清单（脚本生成，别手改）
 │   ├── orbit.ts             六章的高度与编号
@@ -469,6 +501,7 @@ src/
 public/
 ├── og-image.png             全站分享图（npm run og 生成）
 ├── robots.txt               告诉搜索引擎 sitemap 在哪
+├── media/certificates/      证书图（长边 1400）
 ├── media/profile-photo.jpg  简历照片
 ├── media/gallery/           相册压缩图（脚本生成）
 └── textures/                肌理图（脚本生成）

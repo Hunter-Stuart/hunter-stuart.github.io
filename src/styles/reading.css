@@ -1157,3 +1157,116 @@ html[data-theme='dark'] .astro-code span {
   outline-offset: 2px;
   border-radius: 2px;
 }
+/* ---------- 简历：荣誉与证书 ---------- */
+
+.resume-certs .resume-section-head {
+  margin-bottom: 1.25rem;
+}
+
+.cert-grid {
+  display: grid;
+  gap: 1.25rem 1rem;
+  margin: 0;
+  padding: 0;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
+  list-style: none;
+}
+
+.cert-grid > li {
+  display: grid;
+}
+
+.cert-card {
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+  color: var(--text);
+  text-decoration: none;
+}
+
+/* 缩略图：固定比例，取上半部分，证书标题一眼可见 */
+.cert-thumb {
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  aspect-ratio: 4 / 5;
+}
+
+.cert-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+  transition: transform 260ms ease;
+}
+
+/* 横版证书换成横向比例，不再被裁成一条 */
+.cert-card[data-landscape] .cert-thumb {
+  aspect-ratio: 4 / 3;
+}
+
+.cert-card[data-landscape] .cert-thumb img {
+  object-position: 50% 50%;
+}
+
+.cert-card:hover .cert-thumb img {
+  transform: scale(1.03);
+}
+
+.cert-card:hover .cert-thumb {
+  border-color: var(--accent);
+}
+
+.cert-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+}
+
+.cert-level {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+}
+
+/* 国家级给一点额外重量，简历里最先被看到 */
+.cert-card[data-level='national'] .cert-level {
+  font-weight: 600;
+}
+
+.cert-year {
+  color: var(--muted);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+}
+
+.cert-title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.cert-work {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.cert-issuer {
+  color: var(--muted);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cert-thumb img {
+    transition: none;
+  }
+}

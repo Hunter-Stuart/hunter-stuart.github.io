@@ -1,5 +1,6 @@
 ---
 import { socialLinks } from '../data/catalog';
+import { sortedCertificates, certificateImage } from '../data/certificates';
 import { localizedPath, type Locale } from '../i18n/config';
 import { identity, profileCopy } from '../i18n/content';
 import { getUi } from '../i18n/ui';
@@ -102,6 +103,48 @@ const blogPath = localizedPath(locale, '/blog');
             </ul>
           </section>
         ))}
+
+        <section class="resume-section resume-certs">
+          <div class="resume-section-head">
+            <h2>{copy.certTitle}</h2>
+            <span class="mono">{String(sortedCertificates.length).padStart(2, '0')}</span>
+          </div>
+
+          <ul class="cert-grid">
+            {sortedCertificates.map((cert) => (
+              <li>
+                <a
+                  class="cert-card"
+                  href={certificateImage(cert.slug)}
+                  target="_blank"
+                  rel="noopener"
+                  data-level={cert.level}
+                  data-landscape={cert.landscape ? '' : undefined}
+                >
+                  <span class="cert-thumb">
+                    <img
+                      src={certificateImage(cert.slug)}
+                      alt={cert.title[locale]}
+                      width={cert.landscape ? 1400 : 1000}
+                      height={cert.landscape ? 1050 : 1400}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </span>
+                  <span class="cert-meta">
+                    <span class="cert-level">{copy.certLevels[cert.level]}</span>
+                    <span class="mono cert-year">{cert.year}</span>
+                  </span>
+                  <strong class="cert-title">{cert.title[locale]}</strong>
+                  {cert.work && <span class="cert-work">{cert.work[locale]}</span>}
+                  <span class="mono cert-issuer">{cert.issuer[locale]}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          <p class="resume-note mono">{copy.certNote}</p>
+        </section>
 
         <p class="resume-note">{copy.contactNote}</p>
       </div>
