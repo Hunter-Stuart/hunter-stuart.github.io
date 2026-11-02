@@ -21,6 +21,9 @@ const { post } = Astro.props;
   locale={locale}
   title={post.data.title}
   description={post.data.description}
+  type="article"
+  publishedTime={post.data.date.toISOString()}
+  tags={post.data.tags}
   alternatePath={`/posts/${slugOf(post.id)}`}
 >
   <PostPage {locale} {post} />

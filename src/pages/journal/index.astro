@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { journalWeeks, formatWeekLabel, weekRange } from '../../lib/journal';
+import { localizedPath } from '../../i18n/config';
+import { journalCopy } from '../../i18n/tools';
+import '../../styles/reading.css';
+
+const locale = 'zh' as const;
+const copy = journalCopy[locale];
+---
+
+<BaseLayout locale={locale} title={copy.title} description={copy.intro} alternatePath="/journal">
+  <main id="main-content" class="page">
+    <div class="shell">
+      <header class="page-head">
+        <p class="eyebrow">{copy.overline}</p>
+        <h1>{copy.title}</h1>
+        <p>{copy.intro}</p>
+      </header>
+
+      {journalWeeks.length === 0 ? (
+        <div class="empty-state">
+          <p>{copy.empty}</p>
+          <p class="mono">{copy.emptyHint}</p>
+        </div>
+      ) : (
+        <ul class="journal-week-list">
+          {journalWeeks.map((week) => (
+            <li>
+              <a class="journal-week-card" href={localizedPath(locale, `/journal/${week.week}`)}>
+                <div class="journal-week-head">
+                  <span class="mono">{formatWeekLabel(week.week, locale)}</span>
+                  <span class="mono journal-week-range">{weekRange(week, locale)}</span>
+                </div>
+                <h2>
+                  {week.theme || formatWeekLabel(week.week, locale)}
+                  <span aria-hidden="true">↗</span>
+                </h2>
+                <p class="mono journal-week-meta">
+                  {copy.entries(week.rows.length)}
+                  <span class="journal-source">
+                    {week.source === 'csv' ? copy.sourceCsv : copy.sourceMd}
+                  </span>
+                </p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </main>
+</BaseLayout>

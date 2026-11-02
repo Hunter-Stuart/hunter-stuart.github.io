@@ -1,0 +1,44 @@
+---
+/**
+ * 星空层：固定种子程序化生成，构建时算好，运行时零成本。
+ *
+ * 星星大小按幂律分布（多数小星、少数亮星），比均匀随机更像真实夜空。
+ * 水墨画风下整组隐去由 CSS 的 --art-star-opacity 控制，这里不用管。
+ */
+interface Props {
+  /** 星星数量 */
+  count?: number;
+  /** 随机种子：不同章节用不同种子，避免六屏星图完全一样 */
+  seed?: number;
+  /** 视口尺寸，与场景 SVG 的 viewBox 保持一致 */
+  width?: number;
+  height?: number;
+  /** 组类名：场景用 scene-star，欢迎页用 welcome-star */
+  class?: string;
+}
+
+const {
+  count = 90,
+  seed = 1,
+  width = 1440,
+  height = 900,
+  class: className = 'scene-star',
+} = Astro.props;
+
+let state = seed;
+const rand = () => {
+  state = (state * 1664525 + 1013904223) % 4294967296;
+  return state / 4294967296;
+};
+
+const stars = Array.from({ length: count }, () => ({
+  x: Number((rand() * width).toFixed(1)),
+  y: Number((rand() * height).toFixed(1)),
+  // 指数 2.3：小星密集、亮星稀疏
+  r: Number((0.45 + Math.pow(rand(), 2.3) * 2.1).toFixed(2)),
+}));
+---
+
+<g class={className}>
+  {stars.map((star) => <circle cx={star.x} cy={star.y} r={star.r}></circle>)}
+</g>

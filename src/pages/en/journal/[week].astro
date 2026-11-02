@@ -1,0 +1,95 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import {
+  journalWeeks,
+  formatWeekLabel,
+  weekRange,
+  type JournalWeek,
+} from '../../../lib/journal';
+import { buildRefIndex, resolveRefs, hasUnresolvedRef } from '../../../lib/content';
+import { localizedPath } from '../../../i18n/config';
+import { journalCopy } from '../../../i18n/tools';
+import '../../../styles/reading.css';
+
+const locale = 'en' as const;
+const copy = journalCopy[locale];
+
+export function getStaticPaths() {
+  return journalWeeks.map((week) => ({
+    params: { week: week.week },
+    props: { week },
+  }));
+}
+
+const { week } = Astro.props as { week: JournalWeek };
+const refIndex = await buildRefIndex(locale);
+
+const fields = ['date', 'plan', 'done', 'learned', 'thought'] as const;
+
+const cells = week.rows.map((row) =>
+  fields.map((field) => ({
+    raw: row[field],
+    html: resolveRefs(row[field], refIndex),
+  })),
+);
+
+const broken = week.rows.flatMap((row) =>
+  fields.filter((field) => hasUnresolvedRef(row[field], refIndex)).map((field) => row[field]),
+);
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${formatWeekLabel(week.week, locale)} · ${copy.title}`}
+  description={week.theme || copy.intro}
+  alternatePath={`/journal/${week.week}`}
+>
+  <main id="main-content" class="page">
+    <div class="shell">
+      <article class="article">
+        <header class="article-head">
+          <p class="eyebrow">
+            {copy.overline} / {weekRange(week, locale)}
+          </p>
+          <h1>{week.theme || formatWeekLabel(week.week, locale)}</h1>
+          <p class="article-lede mono">
+            {formatWeekLabel(week.week, locale)} · {copy.entries(week.rows.length)} · {week.source === 'csv' ? copy.sourceCsv : copy.sourceMd}
+          </p>
+        </header>
+
+        {week.rows.length === 0 ? (
+          <p class="mono">{copy.empty}</p>
+        ) : (
+          <div class="journal-table-wrap">
+            <table class="journal-table">
+              <thead>
+                <tr>
+                  {copy.tableHead.map((head) => <th scope="col">{head}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {cells.map((row) => (
+                  <tr>
+                    {row.map((cell, i) => (
+                      <td class:list={{ 'journal-date': i === 0 }} set:html={cell.html || '—'} />
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {broken.length > 0 && (
+          <p class="mono journal-unresolved">{copy.unresolved} {broken.join(' / ')}</p>
+        )}
+
+        <footer class="article-foot">
+          <a href={localizedPath(locale, '/journal')}>
+            {copy.backToIndex} <span aria-hidden="true">←</span>
+          </a>
+        </footer>
+      </article>
+    </div>
+  </main>
+</BaseLayout>

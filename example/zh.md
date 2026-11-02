@@ -1,9 +1,25 @@
 ---
+# ── 必填三项：关系到搜索引擎收录和分享卡片，别留空 ──────────────
+
+# title：页面标题。会自动拼成「标题 — 郝瀚宇」用于浏览器标签和搜索结果。
 title: 文章标题
+
+# description：必填。它同时是 <meta description>、og:description 和
+# JSON-LD 的 description —— 留空等于三处都空，分享到群里也是空白摘要。
+# 一句话说清这篇解决什么问题，40–80 字最合适。
 description: 一句话摘要，会显示在首页和列表里
+
+# date：必须用 ISO 格式 YYYY-MM-DD。会转成 article:published_time 和
+# JSON-LD 的 datePublished。不要写「2026年11月1日」这类格式。
 date: 2026-11-01
+
+# ── 其余字段 ────────────────────────────────────────────────
+
 category: 笔记
+
+# tags：尽量填。会逐条输出成 article:tag，并合成 JSON-LD 的 keywords。
 tags: [Astro, 设计]
+
 draft: false
 featured: false
 ---
@@ -67,3 +83,16 @@ const answer = 42;
 ---
 
 收尾段。总结这一篇，或者说说下一篇打算写什么。
+
+---
+
+<!-- 下面这节是发布前自检，这篇写完就整段删掉 -->
+
+## 发布前自检
+
+- [ ] **`description` 写了** —— 它同时喂给 `<meta description>`、`og:description` 和 JSON-LD 的 `description`，空了一处等于三处都空，分享到群里也是空白摘要
+- [ ] **`tags` 填了** —— 逐条输出成 `article:tag`，并合成 JSON-LD 的 `keywords`
+- [ ] **`date` 是 `YYYY-MM-DD`** —— 转成 `article:published_time` 和 `datePublished`
+- [ ] 文件名用英文（URL 里不会出现编码乱码）
+
+其余不用管：canonical、hreflang、分享图（`/og-image.png`）、JSON-LD 结构化数据都由 `BaseLayout` 按 `type="article"` 自动生成。

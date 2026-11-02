@@ -45,7 +45,7 @@ const year = new Date().getFullYear();
           <h3>{home.linksTitle}</h3>
           <span>{home.linksTag}</span>
         </div>
-        <ul class="friend-list" tabindex="0" aria-label={home.linksTitle}>
+        <ul class="friend-list" data-scroll-area tabindex="0" aria-label={home.linksTitle}>
           {friends.map((friend) => (
             <li>
               <a href={friend.href} rel="noopener" target="_blank">

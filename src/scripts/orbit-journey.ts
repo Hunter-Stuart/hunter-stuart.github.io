@@ -135,6 +135,13 @@ function go(delta: number) {
 function scrollableUnder(target: EventTarget | null, deltaY: number): boolean {
   let el = target as HTMLElement | null;
   while (el && el !== document.body) {
+    // 局部滚动区域（项目 / 日常列表）：
+    // 只要指针在它里面，滚轮就完全归它管——滚到顶或底也不再触发翻章，
+    // 否则想看完最后一条时页面会突然跳走。要翻页把指针移出列表即可。
+    if (el.hasAttribute('data-scroll-area') && el.scrollHeight > el.clientHeight + 2) {
+      return true;
+    }
+
     if (el.scrollHeight > el.clientHeight + 2) {
       const style = window.getComputedStyle(el);
       if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
@@ -173,10 +180,12 @@ if (home && panels.length > 0) {
   /* ---------- 触摸 ---------- */
 
   let touchStartY = 0;
+  let touchStartTarget: EventTarget | null = null;
   window.addEventListener(
     'touchstart',
     (event) => {
       touchStartY = event.touches[0]?.clientY ?? 0;
+      touchStartTarget = event.target;
     },
     { passive: true },
   );
@@ -186,6 +195,16 @@ if (home && panels.length > 0) {
     (event) => {
       const delta = touchStartY - (event.changedTouches[0]?.clientY ?? touchStartY);
       if (Math.abs(delta) < 48) return;
+
+      // 触摸起点落在局部滚动区域里 → 和滚轮同样处理，不翻章
+      if (touchStartTarget instanceof Element) {
+        const area = touchStartTarget.closest<HTMLElement>('[data-scroll-area]');
+        if (area && area.scrollHeight > area.clientHeight + 2) {
+          touchStartTarget = null;
+          return;
+        }
+      }
+      touchStartTarget = null;
 
       const inner = panels[current]?.querySelector<HTMLElement>('.orbit-panel-inner');
       if (inner && inner.scrollHeight > inner.clientHeight + 2) {

@@ -1,4 +1,5 @@
 ---
+import Starfield from '../Starfield.astro';
 import Rocket from '../Rocket.astro';
 import { tracks } from '../../../data/tracks';
 
@@ -14,16 +15,7 @@ const arc = track.arc!;
   aria-hidden="true"
   focusable="false"
 >
-  <g class="scene-star">
-    <circle cx="180" cy="120" r="1.4"></circle>
-    <circle cx="404" cy="66" r="1.1"></circle>
-    <circle cx="612" cy="152" r="1.6"></circle>
-    <circle cx="858" cy="92" r="1.2"></circle>
-    <circle cx="1084" cy="148" r="1.5"></circle>
-    <circle cx="1300" cy="76" r="1.1"></circle>
-    <circle cx="248" cy="252" r="1"></circle>
-    <circle cx="1256" cy="288" r="1"></circle>
-  </g>
+  <Starfield count={80} seed={37} />
 
   <!-- 地球本体（圆盘边缘在画面下方） -->
   <circle class="scene-fill--strong" cx="720" cy="1640" r="1000"></circle>

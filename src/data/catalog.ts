@@ -10,20 +10,6 @@ export interface SkillGroup {
   items: SkillItem[];
 }
 
-export interface ProjectEntry {
-  name: string;
-  summary: string;
-  status: string;
-  progress: number;
-  tags: string[];
-}
-
-export interface LifeNote {
-  title: string;
-  date: string;
-  category: string;
-}
-
 export interface FriendLink {
   /** 站点名 / 昵称 */
   name: string;
@@ -35,8 +21,6 @@ export interface FriendLink {
 
 interface Catalog {
   skills: SkillGroup[];
-  projects: ProjectEntry[];
-  lifeNotes: LifeNote[];
   friends: FriendLink[];
 }
 
@@ -67,34 +51,6 @@ export const catalog: Record<Locale, Catalog> = {
           { name: '测试与调试', level: 58 },
         ],
       },
-    ],
-    projects: [
-      {
-        name: '轨道博客',
-        summary: '你现在看到的这个站点：Astro 静态生成、双主题、六章轨道叙事。',
-        status: '进行中',
-        progress: 72,
-        tags: ['Astro', 'CSS', 'SVG'],
-      },
-      {
-        name: '实验数据看板',
-        summary: '把实验室里零散的 CSV 变成可对比的图表，带离线缓存。',
-        status: '维护中',
-        progress: 55,
-        tags: ['TypeScript', '图表'],
-      },
-      {
-        name: '小型地面站',
-        summary: '用一块 SDR 和几个脚本，接收气象卫星的自动图像传输信号。',
-        status: '计划中',
-        progress: 20,
-        tags: ['SDR', '信号处理'],
-      },
-    ],
-    lifeNotes: [
-      { title: '把桌面收拾干净之后，写代码变快了吗', date: '2026-10-18', category: '日常' },
-      { title: '这半年读完的几本书，以及没读完的那些', date: '2026-09-30', category: '阅读' },
-      { title: '夜跑路线换成沿河之后', date: '2026-09-12', category: '身体' },
     ],
     friends: [
       { name: 'iceaxing', realName: '吴昊', note: '雪线之上的个人博客', href: 'https://iceaxing.com' },
@@ -133,45 +89,6 @@ export const catalog: Record<Locale, Catalog> = {
           { name: 'Testing & debugging', level: 58 },
         ],
       },
-    ],
-    projects: [
-      {
-        name: 'This site',
-        summary:
-          'What you are reading now: statically generated with Astro, dual themes, six orbital chapters.',
-        status: 'In progress',
-        progress: 72,
-        tags: ['Astro', 'CSS', 'SVG'],
-      },
-      {
-        name: 'Lab data dashboard',
-        summary:
-          'Turns scattered CSVs from the lab into comparable charts, with offline caching.',
-        status: 'Maintained',
-        progress: 55,
-        tags: ['TypeScript', 'Charts'],
-      },
-      {
-        name: 'Small ground station',
-        summary:
-          'An SDR and a handful of scripts to receive weather satellite image transmissions.',
-        status: 'Planned',
-        progress: 20,
-        tags: ['SDR', 'Signal processing'],
-      },
-    ],
-    lifeNotes: [
-      {
-        title: 'Did clearing my desk actually make me write code faster?',
-        date: '2026-10-18',
-        category: 'Everyday',
-      },
-      {
-        title: 'Books I finished this half-year, and the ones I did not',
-        date: '2026-09-30',
-        category: 'Reading',
-      },
-      { title: 'After moving my night runs to the riverside', date: '2026-09-12', category: 'Body' },
     ],
     friends: [
       { name: 'iceaxing', realName: '吴昊', note: 'A personal blog above the snowline', href: 'https://iceaxing.com' },

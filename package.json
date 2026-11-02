@@ -10,6 +10,7 @@
     "dev": "astro dev",
     "build": "npm run textures && astro build",
     "textures": "node scripts/generate-textures.mjs",
+    "og": "node scripts/generate-og.mjs",
     "gallery": "node scripts/build-gallery.mjs",
     "i18n:check": "node scripts/check-i18n.ts",
     "preview": "astro preview"

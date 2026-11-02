@@ -115,27 +115,43 @@
 
 .scene-star {
   fill: currentColor;
-  animation: star-twinkle 7s ease-in-out infinite;
   /* 水墨画风下星星整组隐去（--art-star-opacity: 0） */
   opacity: var(--art-star-opacity, 1);
 }
 
-.scene-star:nth-child(3n) {
-  animation-delay: -2.4s;
+/* 每颗星用自己的周期闪，避免整片星空同步呼吸 */
+.scene-star circle {
+  animation: star-twinkle 7s ease-in-out infinite;
 }
 
-.scene-star:nth-child(4n) {
+.scene-star circle:nth-child(2n) {
+  animation-delay: -1.3s;
+  animation-duration: 6.1s;
+}
+
+.scene-star circle:nth-child(3n) {
+  animation-delay: -2.4s;
+  animation-duration: 8.3s;
+}
+
+.scene-star circle:nth-child(5n) {
+  animation-delay: -3.7s;
+  animation-duration: 5.4s;
+}
+
+.scene-star circle:nth-child(7n) {
   animation-delay: -4.8s;
+  animation-duration: 9.1s;
 }
 
 @keyframes star-twinkle {
   0%,
   100% {
-    opacity: calc(0.2 * var(--art-star-opacity, 1));
+    opacity: 0.25;
   }
 
   50% {
-    opacity: calc(0.7 * var(--art-star-opacity, 1));
+    opacity: 1;
   }
 }
 
@@ -186,14 +202,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .scene-star,
+  .scene-star circle,
   .scene-route {
     animation: none;
   }
 }
 
 /* 离屏章节暂停动画：只让当前屏的场景在跑 */
-.orbit-panel:not(.is-visible) .scene-star,
+.orbit-panel:not(.is-visible) .scene-star circle,
 .orbit-panel:not(.is-visible) .scene-route {
   animation-play-state: paused;
 }
@@ -1715,4 +1731,88 @@
 :root[lang='en'] .pad-routes small {
   font-size: 0.62rem;
   letter-spacing: 0.1em;
+}
+/* --------------------------------------------------------------------------
+   局部滚动：项目与日常的条目会越来越多，列表自身可滚动。
+   orbit-journey.ts 的 scrollableUnder() 已经会优先滚这类容器，
+   到边界后才翻章，所以翻页逻辑不用改。
+   -------------------------------------------------------------------------- */
+
+.project-list[data-scroll-area] {
+  max-height: clamp(15rem, 40vh, 25rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  /* 滚动时留出一点呼吸，避免内容贴边 */
+  padding-right: 0.75rem;
+  border-top: 1px solid var(--line);
+  /* 上下边缘淡出，和友链列表一致：暗示这里可以滚 */
+  mask-image: linear-gradient(to bottom, transparent 0, #000 0.6rem, #000 calc(100% - 0.9rem), transparent 100%);
+}
+
+.life-grid[data-scroll-area] {
+  max-height: clamp(13rem, 36vh, 22rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding-right: 0.75rem;
+  align-content: start;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 0.6rem, #000 calc(100% - 0.9rem), transparent 100%);
+}
+
+.project-list[data-scroll-area]::-webkit-scrollbar,
+.life-grid[data-scroll-area]::-webkit-scrollbar {
+  width: 6px;
+}
+
+.project-list[data-scroll-area]::-webkit-scrollbar-thumb,
+.life-grid[data-scroll-area]::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--muted) 45%, transparent);
+  border-radius: 3px;
+}
+
+/* 项目标题变成可点的链接 */
+.project-link {
+  color: inherit;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.project-link span {
+  color: var(--scene-accent);
+  font-size: 0.8em;
+  transition: transform 160ms ease;
+}
+
+.project-link:hover span {
+  transform: translate(2px, -2px);
+}
+
+/* 日常卡片整体可点 */
+a.life-card {
+  color: inherit;
+  text-decoration: none;
+  transition: transform 160ms ease;
+}
+
+a.life-card:hover {
+  transform: translateY(-2px);
+}
+
+a.life-card h4 {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+a.life-card h4 span {
+  color: var(--scene-accent);
+  font-size: 0.75em;
+  transition: transform 160ms ease;
+}
+
+a.life-card:hover h4 span {
+  transform: translate(2px, -2px);
 }

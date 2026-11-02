@@ -25,6 +25,7 @@ npm run dev      # 打开 http://localhost:4321
 | `npm run preview` | 用本地服务器看**构建产物**（更接近线上，需先 build） |
 | `npm run gallery` | **换了相册照片以后**，压缩图片 + 更新清单 |
 | `npm run i18n:check` | 检查哪些字段还缺英文 |
+| `npm run og` | 改了分享图上的文字后，重新生成 `public/og-image.png` |
 | `npm run textures` | 重新生成油画/水墨两张肌理图（一般不用手动跑） |
 
 端口被占用时 Astro 会自动换端口，看终端打印的实际地址。想指定：`npm run dev -- --port 4400`。
@@ -32,6 +33,8 @@ npm run dev      # 打开 http://localhost:4321
 ---
 
 ## 2. 写一篇博客
+
+> **模板文件**：`example/zh.md`（中文）和 `example/en.md`（英文）。照着复制，改内容即可。
 
 ### 2.1 新建文件
 
@@ -234,17 +237,9 @@ photos/旅行/jiuzhaigou-20251001.txt   ← 内容：水太清了，看久了会
 
 ---
 
-## 8. 改技术栈 / 项目卡片 / 日常条目
+## 8. 改技术栈
 
-都在 `src/data/catalog.ts`，中英各一份：
-
-| 数组 | 显示在哪 |
-| --- | --- |
-| `skills` | 第二章「技术栈」 |
-| `projects` | 第三章「项目」 |
-| `lifeNotes` | 第五章「日常」 |
-
-技能示例：
+在 `src/data/catalog.ts`，中英各一份：
 
 ```ts
 {
@@ -255,9 +250,135 @@ photos/旅行/jiuzhaigou-20251001.txt   ← 内容：水太清了，看久了会
 
 `level` 是进度条百分比（0–100）。
 
+> **项目和日常不再是数组了。** 它们已经独立成 Markdown 文件和详情页，见下面两节。
+
 ---
 
-## 9. 改配色和画风
+## 9. 写项目
+
+> **模板文件**：`example/project.md`。
+
+项目出现在第三章「卡门线」，现在**每条都能点进详情页**。
+
+新建 `src/content/projects/zh/<slug>.md`（英文放 `en/`）：
+
+```yaml
+---
+title: 项目名
+summary: 一句话说明，显示在第三章的列表里
+status: 进行中          # 进行中 / 维护中 / 计划中，自由写
+progress: 72            # 进度条百分比 0–100
+tags: [Astro, CSS]
+date: 2026-09-06        # 开始时间
+updated: 2026-11-01     # 可选
+links:                  # 可选，详情页底部的外部链接
+  - label: 线上站点
+    href: https://example.com
+---
+
+## 想解决什么
+
+正文随便写，支持完整的 Markdown（标题、表格、代码、图片）。
+```
+
+**`slug` 就是文件名**：`orbit-blog.md` → `/projects/orbit-blog`。
+
+列表区域有最大高度，条目多了会**在列表内滚动**，不会把章节撑长。
+
+---
+
+## 10. 写日常
+
+> **模板文件**：`example/note.md`。
+
+日常出现在第五章「同步轨道」，同样每条都有详情页。
+
+新建 `src/content/notes/zh/<slug>.md`：
+
+```yaml
+---
+title: 标题
+description: 摘要，显示在列表和搜索结果里
+date: 2026-10-18
+category: 日常            # 日常 / 阅读 / 身体 …… 自由写
+tags: [习惯, 专注]        # 可选
+---
+
+正文。
+```
+
+**`slug` 就是文件名**：`clean-desk.md` → `/notes/clean-desk`。
+
+`description` 建议写——它是搜索引擎和分享卡片用的摘要。
+
+---
+
+## 11. 写日志（周表）
+
+> **模板文件**：`example/journal.md`（Markdown 表格版）、`example/journal.csv.example`（CSV 版）。
+
+日志在导航的「工具」左边，一周一个表格。**两种格式都支持**，选你顺手的那个。
+
+### 方式一：Markdown 表格
+
+新建 `src/content/journal/2026-W46.md`（文件名就是周编号）：
+
+```yaml
+---
+week: 2026-W46
+start: 2026-11-09      # 该周周一
+theme: 一句话概括这周在干什么
+---
+
+| 日期 | 计划 | 实际 | 收获 | 感悟 |
+| --- | --- | --- | --- | --- |
+| 11-09 周一 | 读论文 | 读了两篇 | 搞懂了 FFT 补零 | 效率比想象低 |
+| 11-10 周二 | 写代码 | 写了三个模块 | 先对齐数据结构 | 见 [[hello-world]] |
+```
+
+### 方式二：CSV
+
+新建 `src/data/journal/2026-W46.csv`，用 Excel / 飞书表格写完导出：
+
+```csv
+date,plan,done,learned,thought
+"11-09 周一","读论文","读了两篇","搞懂了 FFT 补零","效率比想象低"
+"11-10 周二","写代码","写了三个模块","先对齐数据结构","见[[hello-world]]"
+```
+
+> 内容里有逗号或引号时，**用双引号把整个单元格包起来**，单元格内的引号写两个（`""`）。
+
+### 两种方式的区别
+
+| | Markdown | CSV |
+| --- | --- | --- |
+| 表头 | 中文英文都行 | 同上，`date/plan/done/learned/thought` 最稳 |
+| 显示在页面上 | 标注「Markdown 表格」 | 标注「CSV」 |
+| 适合 | 直接在编辑器里写 | 用表格软件写好导出 |
+
+**表头名中英文都认**：`计划`/`plan`、`实际`/`done`、`收获`/`learned`、`感悟`/`thought`、`日期`/`date`。
+
+周编号决定排序和 URL：`2026-W46` → `/journal/2026-W46`。列表按周**倒序**，最新的在最上面。
+
+### 在日志里引用文章 / 项目 / 日常
+
+单元格里写 `[[slug]]`，构建时会自动：
+
+1. 在文章、项目、日常三处查找这个 slug
+2. 找到了 → 变成链接，**显示标题而不是 slug**
+3. 找不到 → 原样保留 `[[xxx]]`，页面底部会提示有引用没解析，方便你发现写错
+
+```markdown
+| 11-10 周二 | 写代码 | 三个模块 | 先对齐数据结构 | 见 [[hello-world]] |
+```
+
+没有「文章 / 日常」的区分——你只写 slug，系统自己判断它属于哪一类。
+
+> 表格单元格**只认 `[[slug]]`**，不解析 `[文字](链接)` 这种 Markdown 链接语法。要写外部链接就直接贴网址。
+
+---
+
+## 12. 改配色和画风
 
 `src/styles/tokens.css` 顶部有**四组色板**：
 
@@ -271,7 +392,7 @@ photos/旅行/jiuzhaigou-20251001.txt   ← 内容：水太清了，看久了会
 
 ---
 
-## 10. 发布上线
+## 13. 发布上线
 
 ```powershell
 git add -A
@@ -291,7 +412,7 @@ https://github.com/Hunter-Stuart/hunter-stuart.github.io/actions
 
 ---
 
-## 11. 出问题了
+## 14. 出问题了
 
 | 现象 | 原因 / 解决 |
 | --- | --- |
@@ -311,33 +432,48 @@ https://github.com/Hunter-Stuart/hunter-stuart.github.io/actions
 
 ---
 
-## 12. 目录速查
+## 15. 目录速查
 
 ```
 src/
-├── content/posts/{zh,en}/   文章（Markdown）
+├── content/
+│   ├── posts/{zh,en}/       文章（Markdown）
+│   ├── projects/{zh,en}/    项目（Markdown，每条一个详情页）
+│   ├── notes/{zh,en}/       日常（Markdown，每条一个详情页）
+│   └── journal/             日志周表（Markdown 表格）
 ├── data/
-│   ├── catalog.ts           技能 / 项目 / 日常 / 友链
+│   ├── catalog.ts           技术栈 / 友链
+│   ├── journal/             日志周表（CSV 格式的可放这里）
 │   ├── gallery.json         相册清单（脚本生成，别手改）
 │   ├── orbit.ts             六章的高度与编号
 │   └── tracks.ts            轨道曲线与卫星运动参数
 ├── i18n/
 │   ├── content.ts           姓名、邮箱、六章文案、欢迎页、简历
-│   └── ui.ts                界面按钮文字
+│   ├── ui.ts                界面按钮文字
+│   └── tools.ts             工具页与日志页文案
+├── lib/
+│   ├── posts.ts             文章读取
+│   ├── content.ts           项目 / 日常读取 + [[slug]] 引用解析
+│   └── journal.ts           周表解析（Markdown 与 CSV 两种）
 ├── components/              页面组件
 ├── styles/
 │   ├── tokens.css           配色（四组色板）
 │   ├── global.css           基础排版、页头页脚
 │   ├── home.css             六章布局与动效
-│   ├── reading.css          文章、简历、相册
+│   ├── reading.css          文章、简历、相册、日志表格
+│   ├── tools.css            工具页
+│   ├── smith.css            史密斯圆图
 │   └── welcome.css          欢迎页
 └── pages/                   路由
 
 public/
+├── og-image.png             全站分享图（npm run og 生成）
+├── robots.txt               告诉搜索引擎 sitemap 在哪
 ├── media/profile-photo.jpg  简历照片
 ├── media/gallery/           相册压缩图（脚本生成）
 └── textures/                肌理图（脚本生成）
 
 photos/                      相册原图（不进 git）
-scripts/                     图片/相册/翻译检查脚本
+scripts/                     纹理 / 相册 / 分享图 / 翻译检查脚本
+example/                     写作模板（文章 / 项目 / 日常 / 日志两种格式）
 ```

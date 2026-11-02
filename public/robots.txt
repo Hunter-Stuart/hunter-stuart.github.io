@@ -1,0 +1,4 @@
+﻿User-agent: *
+Allow: /
+
+Sitemap: https://hunter-stuart.github.io/sitemap-index.xml

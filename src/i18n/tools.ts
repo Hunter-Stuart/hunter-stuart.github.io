@@ -223,3 +223,48 @@ export const filterCopy: Record<Locale, FilterCopy> = {
     unstable: 'This configuration is unstable (poles outside the unit circle). Lower the order or raise the cutoff.',
   },
 };
+
+/* ------------------------------------------------------------------ */
+/* 日志（周表）                                                         */
+/* ------------------------------------------------------------------ */
+
+export const journalCopy: Record<Locale, {
+  title: string;
+  overline: string;
+  intro: string;
+  empty: string;
+  emptyHint: string;
+  tableHead: [string, string, string, string, string];
+  backToIndex: string;
+  entries: (count: number) => string;
+  sourceMd: string;
+  sourceCsv: string;
+  unresolved: string;
+}> = {
+  zh: {
+    title: '日志',
+    overline: 'WEEKLY LOG',
+    intro: '以周为单位记录：每天准备做什么、实际做了什么、收获与感悟。表格里的 [[slug]] 会自动指向对应的文章、项目或日常。',
+    empty: '还没有日志。',
+    emptyHint: '在 src/content/journal/ 放一个 .md 周表，或在 src/data/journal/ 放一个 .csv —— 两种格式都认。',
+    tableHead: ['日期', '计划', '实际', '收获', '感悟'],
+    backToIndex: '返回所有周',
+    entries: (count) => `${count} 条记录`,
+    sourceMd: 'Markdown 表格',
+    sourceCsv: 'CSV',
+    unresolved: '有引用没解析到，检查 slug 是否写错：',
+  },
+  en: {
+    title: 'Journal',
+    overline: 'WEEKLY LOG',
+    intro: 'One week at a time: what I planned each day, what actually happened, what I learned and what I made of it. An [[slug]] in a cell links to the matching post, project or note.',
+    empty: 'No journal entries yet.',
+    emptyHint: 'Drop a weekly .md table in src/content/journal/, or a .csv in src/data/journal/ — both formats work.',
+    tableHead: ['Date', 'Planned', 'Actual', 'Learned', 'Thought'],
+    backToIndex: 'All weeks',
+    entries: (count) => `${count} entries`,
+    sourceMd: 'Markdown table',
+    sourceCsv: 'CSV',
+    unresolved: 'Some references did not resolve — check the slug:',
+  },
+};

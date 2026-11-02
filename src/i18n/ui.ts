@@ -10,6 +10,7 @@ export interface UiCopy {
     posts: string;
     friends: string;
     tools: string;
+  journal: string;
   };
   navLabel: string;
   mobileNavLabel: string;
@@ -34,6 +35,14 @@ export interface UiCopy {
   rights: string;
   postsIndexTitle: string;
   postsIndexIntro: (count: number) => string;
+  tabPosts: string;
+  tabNotes: string;
+  tabProjects: string;
+  noNotes: string;
+  noProjects: string;
+  sortDesc: string;
+  sortAsc: string;
+  sortLabel: string;
   emailPrimary: string;
   galleryTitle: string;
   galleryIntro: string;
@@ -48,7 +57,7 @@ export interface UiCopy {
 export const ui: Record<Locale, UiCopy> = {
   zh: {
     skipToContent: '跳到主要内容',
-    nav: { home: '首页', blog: '博客', profile: '个人简历', posts: '全部日志', friends: '友链', tools: '工具' },
+    nav: { home: '首页', blog: '博客', profile: '个人简历', posts: '所有文章', friends: '友链', tools: '工具', journal: '日志' },
     navLabel: '主导航',
     mobileNavLabel: '移动导航',
     menuOpen: '打开导航菜单',
@@ -63,16 +72,24 @@ export const ui: Record<Locale, UiCopy> = {
     nextStation: '下一站',
     backToPad: '回到发射台',
     readBlog: '读博客',
-    readPosts: '全部日志',
-    backToPosts: '返回日志',
+    readPosts: '所有文章',
+    backToPosts: '返回文章',
     toc: '目录',
     entries: (count) => `${count} 篇`,
-    empty: '还没有发布任何日志。',
+    empty: '还没有发布任何文章。',
     rss: 'RSS',
     contact: '联系方式',
     rights: '保留所有权利',
-    postsIndexTitle: '日志',
-    postsIndexIntro: (count) => `共 ${count} 篇。按发射时间倒序排列。`,
+    postsIndexTitle: '所有文章',
+    tabPosts: '笔记',
+    tabNotes: '日常',
+    tabProjects: '项目',
+    noNotes: '还没有写过日常。',
+    noProjects: '还没有项目。',
+    sortDesc: '倒序',
+    sortAsc: '正序',
+    sortLabel: '切换排序方式',
+    postsIndexIntro: (count) => `共 ${count} 篇，按升空时间排列`,
     emailPrimary: '邮箱',
     galleryTitle: '随手拍',
     galleryIntro: '路上拍的一些，按时间分类。',
@@ -85,7 +102,7 @@ export const ui: Record<Locale, UiCopy> = {
   },
   en: {
     skipToContent: 'Skip to content',
-    nav: { home: 'Home', blog: 'Blog', profile: 'Résumé', posts: 'All posts', friends: 'Friends', tools: 'Tools' },
+    nav: { home: 'Home', blog: 'Blog', profile: 'Résumé', posts: 'All posts', friends: 'Friends', tools: 'Tools', journal: 'Journal' },
     navLabel: 'Main navigation',
     mobileNavLabel: 'Mobile navigation',
     menuOpen: 'Open menu',
@@ -108,7 +125,15 @@ export const ui: Record<Locale, UiCopy> = {
     rss: 'RSS',
     contact: 'Contact',
     rights: 'All rights reserved',
-    postsIndexTitle: 'Flight log',
+    postsIndexTitle: 'All entries',
+    tabPosts: 'Notes',
+    tabNotes: 'Life',
+    tabProjects: 'Projects',
+    noNotes: 'No notes yet.',
+    noProjects: 'No projects yet.',
+    sortDesc: 'Newest',
+    sortAsc: 'Oldest',
+    sortLabel: 'Change sort order',
     postsIndexIntro: (count) => `${count} entries, newest first.`,
     emailPrimary: 'Email',
     galleryTitle: 'Gallery',

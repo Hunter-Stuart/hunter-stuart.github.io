@@ -2,7 +2,7 @@
 import ChapterMarker from '../orbit/ChapterMarker.astro';
 import KarmanLineScene from '../orbit/scenes/KarmanLineScene.astro';
 import { chapters } from '../../data/orbit';
-import { getCatalog } from '../../data/catalog';
+import { getProjects } from '../../lib/content';
 import { localizedPath, type Locale } from '../../i18n/config';
 import { homeCopy } from '../../i18n/content';
 import { getUi } from '../../i18n/ui';
@@ -15,7 +15,7 @@ const { locale } = Astro.props;
 const chapter = chapters[2];
 const copy = homeCopy[locale].chapters[chapter.id];
 const ui = getUi(locale);
-const { projects } = getCatalog(locale);
+const projects = await getProjects(locale);
 const next = chapters[3];
 const nextCopy = homeCopy[locale].chapters[next.id];
 ---
@@ -38,11 +38,16 @@ const nextCopy = homeCopy[locale].chapters[next.id];
       <p data-reveal>{copy.description}</p>
     </div>
 
-    <ul class="project-list">
+    <ul class="project-list" data-scroll-area>
       {projects.map((project) => (
         <li class="project-item" data-reveal>
           <div class="project-item-head">
-            <h4>{project.name}</h4>
+            <h4>
+              <a class="project-link" href={localizedPath(locale, `/projects/${project.slug}`)}>
+                {project.title}
+                <span aria-hidden="true">↗</span>
+              </a>
+            </h4>
             <span class="project-status">{project.status}</span>
           </div>
           <div class="project-body">

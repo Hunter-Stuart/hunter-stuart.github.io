@@ -29,8 +29,12 @@
 | `/` | 欢迎页，两个入口：个人简历 / 博客 |
 | `/blog` | 六章轨道博客，翻页浏览 |
 | `/profile` | 个人简历 |
-| `/posts` | 全部日志 |
+| `/posts` | 所有文章 |
 | `/posts/<slug>` | 单篇文章 |
+| `/projects/<slug>` | 项目详情 |
+| `/notes/<slug>` | 日常详情 |
+| `/journal` | 日志（周表） |
+| `/journal/<week>` | 单周表格 |
 | `/gallery` | 相册 |
 | `/friends` | 友链 |
 | `/tools` | 工具集（三个可交互的小工具） |
@@ -160,11 +164,15 @@ src/
 │   ├── chapters/       各章内容组件
 │   ├── islands/        React island（史密斯圆图）
 │   └── tools/          工具组件（番茄钟、滤波器）
-├── content/posts/      Markdown 文章（zh / en）
-├── data/               章节定义、轨道参数、技术栈 / 项目 / 友链清单
-├── i18n/               中英文案字典、界面文字、工具页文案
+├── content/
+│   ├── posts/          Markdown 文章（zh / en）
+│   ├── projects/       项目（每条一个详情页）
+│   ├── notes/          日常（每条一个详情页）
+│   └── journal/        日志周表（Markdown 表格）
+├── data/               章节定义、轨道参数、技术栈 / 友链清单、CSV 周表
+├── i18n/               中英文案字典、界面文字、工具页与日志文案
 ├── layouts/            页面骨架
-├── lib/                工具函数（史密斯圆图算法等）
+├── lib/                内容读取、周表解析、史密斯圆图算法
 ├── pages/              路由
 ├── scripts/            翻页与交互脚本
 └── styles/             色板与分页样式

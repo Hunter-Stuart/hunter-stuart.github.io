@@ -43,17 +43,40 @@
 .welcome-star {
   fill: currentColor;
   opacity: var(--art-star-opacity, 1);
+}
+
+.welcome-star circle {
   animation: welcome-star-twinkle 7s ease-in-out infinite;
+}
+
+.welcome-star circle:nth-child(2n) {
+  animation-delay: -1.4s;
+  animation-duration: 6.3s;
+}
+
+.welcome-star circle:nth-child(3n) {
+  animation-delay: -2.6s;
+  animation-duration: 8.6s;
+}
+
+.welcome-star circle:nth-child(5n) {
+  animation-delay: -3.9s;
+  animation-duration: 5.6s;
+}
+
+.welcome-star circle:nth-child(7n) {
+  animation-delay: -5.1s;
+  animation-duration: 9.4s;
 }
 
 @keyframes welcome-star-twinkle {
   0%,
   100% {
-    opacity: calc(0.2 * var(--art-star-opacity, 1));
+    opacity: 0.25;
   }
 
   50% {
-    opacity: calc(0.7 * var(--art-star-opacity, 1));
+    opacity: 1;
   }
 }
 

@@ -2,7 +2,7 @@
 import ChapterMarker from '../orbit/ChapterMarker.astro';
 import GeostationaryScene from '../orbit/scenes/GeostationaryScene.astro';
 import { chapters } from '../../data/orbit';
-import { getCatalog } from '../../data/catalog';
+import { getNotes } from '../../lib/content';
 import { localizedPath, type Locale } from '../../i18n/config';
 import { homeCopy } from '../../i18n/content';
 import { getUi } from '../../i18n/ui';
@@ -16,9 +16,12 @@ const chapter = chapters[4];
 const copy = homeCopy[locale].chapters[chapter.id];
 const home = homeCopy[locale];
 const ui = getUi(locale);
-const { lifeNotes } = getCatalog(locale);
-// 英文标题更长，卡片少放一张
-const notes = locale === 'en' ? lifeNotes.slice(0, 2) : lifeNotes;
+const notes = await getNotes(locale);
+const dateFormat = new Intl.DateTimeFormat(locale === 'zh' ? 'zh-CN' : 'en-GB', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
 const next = chapters[5];
 const nextCopy = home.chapters[next.id];
 ---
@@ -41,13 +44,16 @@ const nextCopy = home.chapters[next.id];
       <p data-reveal>{copy.description}</p>
     </div>
 
-    <div class="life-grid">
+    <div class="life-grid" data-scroll-area>
       {notes.map((note) => (
-        <article class="life-card" data-reveal>
-          <time datetime={note.date}>{note.date}</time>
-          <h4>{note.title}</h4>
+        <a class="life-card" href={localizedPath(locale, `/notes/${note.slug}`)} data-reveal>
+          <time datetime={note.date.toISOString()}>{dateFormat.format(note.date)}</time>
+          <h4>
+            {note.title}
+            <span aria-hidden="true">↗</span>
+          </h4>
           <p>{note.category}</p>
-        </article>
+        </a>
       ))}
     </div>
 
