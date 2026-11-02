@@ -29,7 +29,7 @@ export const identity: Record<Locale, SiteIdentity> = {
     motto: '斗光破冥，无色掩炽。',
     email: 'hunter_stuart@outlook.com',
     altEmails: [
-      { label: '校内', address: '2024010913011@std.uestc.edu.cn' },
+      { label: '校内', address: 'hanyu-hao@std.uestc.edu.cn' },
       { label: '备用', address: '3511139523@qq.com' },
     ],
     location: '成都 / 中国',
@@ -46,7 +46,7 @@ export const identity: Record<Locale, SiteIdentity> = {
     motto: 'Break the dark; no form can smother the flame.',
     email: 'hunter_stuart@outlook.com',
     altEmails: [
-      { label: 'Campus', address: '2024010913011@std.uestc.edu.cn' },
+      { label: 'Campus', address: 'hanyu-hao@std.uestc.edu.cn' },
       { label: 'Alt', address: '3511139523@qq.com' },
     ],
     location: 'CHENGDU / CHINA',
