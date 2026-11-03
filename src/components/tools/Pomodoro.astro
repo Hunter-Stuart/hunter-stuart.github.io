@@ -294,10 +294,12 @@ const CIRCUMFERENCE = (2 * Math.PI * 54).toFixed(2);
         mode = 'focus';
       }
 
-      running = false;
-      endsAt = 0;
+      // 自动接上下一轮：专注 → 休息 → 专注，首尾相接成一个大循环。
+      // 想停随时点「暂停」，剩余秒数会保留，再点「开始」继续。
       remaining = totalOf(mode);
-      stopTicker();
+      endsAt = Date.now() + remaining * 1000;
+      running = true;
+      startTicker(); // 内部会先 stopTicker，不会叠加定时器
       render();
       save();
     }
