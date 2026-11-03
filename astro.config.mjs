@@ -3,7 +3,7 @@ import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: 'https://hunter-stuart.github.io',
+  site: 'https://hunter-stuart.com',
   output: 'static',
   trailingSlash: 'never',
   integrations: [react(), sitemap()],

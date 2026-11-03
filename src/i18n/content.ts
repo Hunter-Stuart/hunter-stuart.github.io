@@ -22,10 +22,10 @@ export const identity: Record<Locale, SiteIdentity> = {
     name: 'Hunter Stuart',
     localName: '郝瀚宇',
     kicker: '六段轨道，一本日志',
-    title: '郝瀚宇 — 成长日记',
-    description: '技术、项目与生活，按离地高度编排的六段轨道。',
+    title: '郝瀚宇 · 电子信息 / 通信 ICT / AI 笔记',
+    description: '电子科技大学通信工程在读。记录信号处理、通信系统、嵌入式与 AI 的工程笔记、项目复盘，以及每周日志。',
     intro:
-      '我是郝瀚宇，也叫 Hunter Stuart。这里记录工程笔记、做过的项目，以及那些在深夜想到、白天又忘记的问题。',
+      '我是郝瀚宇，也叫 Hunter Stuart，电子科技大学通信工程在读。这里记录信号处理、通信系统与 AI 方向的工程笔记、做过的项目，以及那些在深夜想到、白天又忘记的问题。',
     motto: '斗光破冥，无色掩炽。',
     email: 'hunter_stuart@outlook.com',
     altEmails: [
@@ -38,11 +38,11 @@ export const identity: Record<Locale, SiteIdentity> = {
     name: 'Hunter Stuart',
     localName: '郝瀚宇',
     kicker: 'SIX ORBITS, ONE LOG',
-    title: 'Hunter Stuart — A Growth Journal',
+    title: 'Hunter Stuart · Electronics, Telecom & AI Notes',
     description:
-      'Notes on engineering, projects and everyday life, arranged by altitude above the ground.',
+      'Undergraduate in Communications Engineering at UESTC. Engineering notes on signal processing, telecom, embedded systems and AI, plus project write-ups and a weekly journal.',
     intro:
-      'I am Hunter Stuart — 郝瀚宇 in Chinese. This is where I keep engineering notes, the projects I finished, and the questions that arrive at midnight and vanish by morning.',
+      'I am Hunter Stuart — 郝瀚宇 in Chinese — an undergraduate in Communications Engineering at UESTC. This is where I keep engineering notes on signal processing, telecom and AI, the projects I finished, and the questions that arrive at midnight and vanish by morning.',
     motto: 'Break the dark; no form can smother the flame.',
     email: 'hunter_stuart@outlook.com',
     altEmails: [

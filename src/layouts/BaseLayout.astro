@@ -3,6 +3,7 @@ import SiteFooter from '../components/SiteFooter.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import { htmlLanguage, localizedPath, otherLocale, type Locale } from '../i18n/config';
 import { identity } from '../i18n/content';
+import { socialLinks } from '../data/catalog';
 import { getUi } from '../i18n/ui';
 import '../styles/global.css';
 
@@ -52,6 +53,41 @@ const otherHref = localizedPath(other, alternatePath ?? strippedPath);
 const origin = Astro.site ?? Astro.url.origin;
 const ogImage = new URL(image, origin);
 const siteName = identity[locale].name;
+
+/**
+ * 人物结构化数据：只在站首页输出。
+ * 搜索引擎靠 sameAs 把「Hunter Stuart」这个名字和具体的人和账号连起来，
+ * 是品牌词能被检索到的主要抓手之一。
+ */
+const personData =
+  type === 'website'
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: identity[locale].localName,
+        alternateName: siteName,
+        url: new URL(localizedPath(locale, '/'), origin).href,
+        jobTitle:
+          locale === 'zh' ? '通信工程本科生' : 'Undergraduate in Communications Engineering',
+        affiliation: {
+          '@type': 'CollegeOrUniversity',
+          name:
+            locale === 'zh'
+              ? '电子科技大学'
+              : 'University of Electronic Science and Technology of China',
+        },
+        knowsAbout: [
+          'Signal Processing',
+          'Telecommunications',
+          'Embedded Systems',
+          'Artificial Intelligence',
+          'RF Engineering',
+          'Astro',
+        ],
+        email: `mailto:${identity[locale].email}`,
+        sameAs: socialLinks.map((link) => link.href),
+      }
+    : null;
 
 /** 结构化数据：文章页给 Article，其余给 WebSite */
 const structuredData =
@@ -111,6 +147,7 @@ const structuredData =
     ))}
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+    {personData && <script type="application/ld+json" set:html={JSON.stringify(personData)} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonical} />
     <link rel="sitemap" href="/sitemap-index.xml" />
