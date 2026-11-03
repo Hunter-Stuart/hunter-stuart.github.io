@@ -77,6 +77,7 @@ export const certificates: Certificate[] = [
       en: '14th National Optoelectronic Design Contest — Southwest Region, First Prize',
     },
     issuer: { zh: '西南赛区组织委员会', en: 'Southwest Region Organising Committee' },
+    landscape: true,
   },
   {
     slug: 'honghu-admission-2025',
@@ -111,6 +112,7 @@ export const certificates: Certificate[] = [
       en: '1st UESTC Yingcai Cup Electronic Design Contest — Second Prize',
     },
     issuer: { zh: '英才实验学院', en: 'Yingcai Honours College' },
+    landscape: true,
   },
   {
     slug: 'mcm-simulation-2025-second',
@@ -121,6 +123,7 @@ export const certificates: Certificate[] = [
       en: 'UESTC MCM Simulation Contest 2025 — Second Prize',
     },
     issuer: { zh: '电子科技大学 教务处 / 数学科学学院', en: 'UESTC Academic Affairs Office & School of Mathematical Sciences' },
+    landscape: true,
   },
   {
     slug: 'recitation-2024-second',
@@ -131,6 +134,7 @@ export const certificates: Certificate[] = [
       en: '4th Campus Arts Festival Recitation Contest — Second Prize',
     },
     issuer: { zh: '大学生文化素质教育中心', en: 'UESTC Cultural Education Centre' },
+    landscape: true,
   },
 ];
 
